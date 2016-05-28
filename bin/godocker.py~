@@ -26,12 +26,16 @@ class GodockerJobRunner(AsynchronousJobRunner):
 			job_name = dict(map = str),
 			cpu = dict(map = int,valid = lambda x: int > 0,default = 1),
 			ram = dict(map = int,valid = lambda x: int > 0,default = 1),
-			image = dict(map = str,valid = lambda x: x in ("centos:latest","rastasheep/ubuntu-sshd","osallou/dockernode"))
+			image = dict(map = str,valid = lambda x: x in ("centos:latest","rastasheep/ubuntu-sshd","osallou/dockernode")),
+			user = dict(map = str),
+			key = dict(map = str)
         )
         if 'runner_param_specs' not in kwargs:
 			kwargs['runner_param_specs'] = dict()
 
 		kwargs['runner_param_specs'].update(runner_param_specs)
+
+		# godocker API login call to be done here
 
 		super(GodockerJobRunner, self).__init__(app, nworkers, **kwargs)
 		""" Following methods starts threads.
