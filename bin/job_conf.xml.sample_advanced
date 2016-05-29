@@ -170,7 +170,7 @@
         </destination>
         <destination id="god" runner="godocker">
             <!-- docker parameters in godocker runner -->
-            <param id="docker_override_repo">mNone</param>
+            <param id="docker_override_repo">None</param>
             <param id="docker_override_owner">None</param>
             <param id="docker_override_image">None</param>
             <param id="docker_override_tag">None</param>
