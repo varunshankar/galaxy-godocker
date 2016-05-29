@@ -40,7 +40,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         kwargs['runner_param_specs'].update(runner_param_specs)
         
         # godocker API login call to be done here
-        self.auth = login(self.runner_params["apikey"],self.runner_params["user"],self.server)
+        self.auth = self.login(self.runner_params["apikey"],self.runner_params["user"],self.server)
         if not self.auth:
             log.debug("Authentication failure!! Job cannot be started")
         else:
@@ -52,7 +52,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
             self._init_worker_threads()
 
 
-    def login(apikey,login,server,noCert = False):
+    def login(self,apikey,login,server,noCert = False):
 
         data=json.dumps({'user': login, 'apikey': apikey})
         auth = HttpUtils.http_post_request("/api/1.0/authenticate",data,server,{'Content-type': 'application/json','Accept': 'application/json'},noCert)
