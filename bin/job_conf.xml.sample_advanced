@@ -118,7 +118,10 @@
         </plugin>
         <plugin id="godocker" type="runner" load="galaxy.jobs.runners.godocker:GodockerJobRunner">
             <!--  REST based runner , submits jobs to godocker -->
-            <param id="jobname">test1</param>
+            <param id="godocker_master">test1</param>
+            <param id="job_name">test1</param>
+			<param id="tags">null</param>
+			<param id="desc">null</param>
             <param id="cpu">1</param>
             <param id="ram">1</param>
             <param id="image">centos:latest</param>
