@@ -41,6 +41,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         
         # godocker API login call to be done here
         self.auth = self.login(self.runner_params["apikey"],self.runner_params["user"],self.server)
+
         if not self.auth:
             log.debug("Authentication failure!! Job cannot be started")
         else:
@@ -51,6 +52,54 @@ class GodockerJobRunner(AsynchronousJobRunner):
             self._init_monitor_thread()
             self._init_worker_threads()
 
+
+    def queue_job(self, job_wrapper):
+
+    	job_name = self.get_unique_job_name(job_wrapper)
+    	log.debug("Starting queue_job for job " + job_name)
+        if not self.prepare_job(job_wrapper, include_metadata=False, include_work_dir_outputs=False):
+            return
+        job_destination = job_wrapper.job_destination
+
+        # Create the Json object and call the godocker API here
+
+        ajs = AsynchronousJobState(files_dir = job_wrapper.working_directory,job_wrapper = job_wrapper,job_id = job_name,job_destination = job_destination)
+        self.monitor_queue.put(ajs)
+        
+
+    def check_watched_item(self, job_state):
+        # Get the job current status from godocker using jobid
+        job = self.get_task(job_state.job_id)
+        
+        #Update the job status to galaxy here
+        
+
+    def stop_job(self,job):
+    	pass
+    
+    def recover(self,job):
+    	pass
+	
+    #Helper functions
+    def get_unique_job_name(self, job_wrapper):
+        return "god-" + job_wrapper.get_id_tag()
+
+    
+    """
+    def get_exit_code(job_id):
+    
+    Auth.authenticate()
+
+    task = HttpUtils.http_get_request(
+        "/api/1.0/task/"+str(job_id),
+        Auth.server,
+        {'Authorization':'Bearer '+Auth.token},
+        Auth.noCert
+    )
+
+    job=task.json()
+    """
+    #GoDocker API helper functions
 
     def login(self,apikey,login,server,noCert = False):
 
@@ -64,13 +113,63 @@ class GodockerJobRunner(AsynchronousJobRunner):
         return auth
 
 
-    def queue_job(self, job_wrapper):
-    	
-    	log.debug("Starting queue_job for job " + job_wrapper.get_id_tag())
-	
-	
-    def stop_job(self,job):
-    	pass
-    
-    def recover(self,job):
-    	pass
+    def post_task(self,job):
+
+        Auth.authenticate()
+        
+        # TODO fill the job template. 
+        #Job template
+        """
+        job = {
+        'user' : {
+            'id' : user_infos['id'],
+            'uid' : user_infos['uid'],
+            'gid' : user_infos['gid'],
+            'project' : project
+        },
+        'date': time.mktime(dt.timetuple()),
+        'meta': {
+            'name': name,
+            'description': description,
+            'tags': tags_tab
+        },
+        'requirements': {
+            'cpu': cpu,
+            # In Gb
+            'ram': ram,
+            'array': { 'values': array},
+            'label': labels,
+	    'tasks': tasks_depends,
+            'tmpstorage': None
+        },
+        'container': {
+            'image': str(image),
+            'volumes': volumes,
+            'network': True,
+            'id': None,
+            'meta': None,
+            'stats': None,
+            'ports': [],
+            'root': root
+        },
+        'command': {
+            'interactive': interactive,
+            'cmd': command,
+        },
+        'status': {
+            'primary': None,
+            'secondary': None
+        }
+
+      }
+        """
+        result = HttpUtils.http_post_request("/api/1.0/task",json.dumps(job),Auth.server,{'Authorization':'Bearer '+Auth.token,'Content-type': 'application/json', 'Accept':'application/json'},Auth.noCert)
+        log.debug("Response from godocker: "+ str(result.json()['msg']) + " ID: " + int(result.json()['id']))
+
+    def get_task(self,job_id):
+        #Get job details
+        Auth.authenticate()
+        result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id),Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
+        job=result.json()
+        return job
+
