@@ -13,12 +13,15 @@ def test_login(apikey,login,server,noCert = False):
         Auth.create_auth_file(apikey, login, server, noCert)
     return auth
 
-auth = test_login("DKZPM1NDE3","gosc","http://cloud-30.genouest.org")
-print auth
-mem = inspect.getmembers(auth)
-for i in mem:
-	print i
 
-auth = auth.json()
-print "Auth token: " + auth['token']
+if __name__ == "__main__":
+   auth = test_login("DKZPM1NDE3","gosc","http://cloud-30.genouest.org")
+   print auth
+   mem = inspect.getmembers(auth)
+   for i in mem:
+	   print i
+   
+   auth = auth.json()
+   print "Auth token: " + auth['token']
+
 
