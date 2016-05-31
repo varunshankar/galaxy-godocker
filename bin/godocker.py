@@ -84,21 +84,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
     def get_unique_job_name(self, job_wrapper):
         return "god-" + job_wrapper.get_id_tag()
 
-    
-    """
-    def get_exit_code(job_id):
-    
-    Auth.authenticate()
 
-    task = HttpUtils.http_get_request(
-        "/api/1.0/task/"+str(job_id),
-        Auth.server,
-        {'Authorization':'Bearer '+Auth.token},
-        Auth.noCert
-    )
-
-    job=task.json()
-    """
     #GoDocker API helper functions
 
     def login(self,apikey,login,server,noCert = False):
