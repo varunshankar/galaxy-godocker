@@ -76,7 +76,9 @@ class GodockerJobRunner(AsynchronousJobRunner):
         
 
     def stop_job(self,job):
-    	pass
+    	#Call the godocker API here
+        #Update the status to galaxy
+        return
     
     def recover(self,job):
     	pass
@@ -122,7 +124,6 @@ class GodockerJobRunner(AsynchronousJobRunner):
         },
         'requirements': {
             'cpu': cpu,
-            # In Gb
             'ram': ram,
             'array': { 'values': array},
             'label': labels,
@@ -157,6 +158,29 @@ class GodockerJobRunner(AsynchronousJobRunner):
         #Get job details
         Auth.authenticate()
         result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id),Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
-        job=result.json()
+        job = result.json()
         return job
+
+    def task_suspend(self,job_id):
+        #Suspend actively running job
+        Auth.authenticate()
+        result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id)+"/suspend/",Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
+        job = result.json()
+        return job
+
+    def get_task_status(self,job_id):
+        #Get job status
+        Auth.authenticate()
+        result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id)+"/status/",Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
+        job = result.json()
+        return job
+
+    def delete_task(self,job_id):
+        #Delete a job 
+        Auth.authenticate()
+        result = HttpUtils.http_delete_request("/api/1.0/task/"+str(job_id),Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
+        job = result.json()
+        return job
+    
+
 
