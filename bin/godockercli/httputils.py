@@ -23,6 +23,7 @@ class HttpUtils:
         try:
             url=server+query
             res = requests.post(url, data, headers=header, verify=verify_ssl)
+            print('Godocker Response:',res, "\n")
 
         except requests.exceptions.ConnectionError as e:
             print('A Connection error occurred:', e)
@@ -30,11 +31,11 @@ class HttpUtils:
             if re.search("SSL3_GET_SERVER_CERTIFICATE", str(e)):
                 print("Use the --no-certificate option if you trust the remote godocker server certificate.")
 
-            return 0
+            return False
 
         except requests.exceptions.HTTPError as e:
             print('A HTTP error occurred:', e)
-            return 0
+            return False
 
         HttpUtils.test_status_code(res)
 
@@ -55,11 +56,11 @@ class HttpUtils:
 
         except requests.exceptions.ConnectionError as e:
             print('A Connection error occurred:', e)
-            return 0
+            return False
 
         except requests.exceptions.HTTPError as e:
             print('A HTTP error occurred:', e)
-            return 0
+            return False
 
         HttpUtils.test_status_code(res)
 
@@ -80,11 +81,11 @@ class HttpUtils:
 
         except requests.exceptions.ConnectionError as e:
             print('A Connection error occurred:', e)
-            return 0
+            return False
 
         except requests.exceptions.HTTPError as e:
             print('A HTTP error occurred:', e)
-            return 0
+            return False
 
         HttpUtils.test_status_code(res)
 
@@ -105,11 +106,11 @@ class HttpUtils:
 
         except requests.exceptions.ConnectionError as e:
             print('A Connection error occurred:', e)
-            return 0
+            return False
 
         except requests.exceptions.HTTPError as e:
             print('A HTTP error occurred:', e)
-            return 0
+            return False
 
         HttpUtils.test_status_code(res)
 
@@ -128,6 +129,6 @@ class HttpUtils:
         if httpresult.status_code == 404:
             print('Not Found : The resource could not be found.')
         
-        return httpresult.status_code
+        return False
 
 

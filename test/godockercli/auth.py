@@ -28,7 +28,7 @@ class Auth:
         # if file doesn't exists, exit
         if not os.path.exists(config_path):
             print("please launch the godlogin command to authenticate")
-            return 0
+            return False
         else:
             # read auth
             auth_infos=json.loads(open(config_path, 'r').readline())
@@ -40,8 +40,11 @@ class Auth:
             data=json.dumps({'user': Auth.login, 'apikey': Auth.apikey})
 
             res = HttpUtils.http_post_request("/api/1.0/authenticate", data, Auth.server, {'Content-type': 'application/json', 'Accept': 'application/json'}, Auth.noCert)
-
-            Auth.token = res.json()['token'].encode('ascii','ignore').decode('utf-8')
+            if not res:
+                return False
+            else:
+                Auth.token = res.json()['token'].encode('ascii','ignore').decode('utf-8')
+                return True
 
     @staticmethod
     def create_auth_file(apikey, login, server, noCert):

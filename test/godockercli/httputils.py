@@ -6,6 +6,7 @@ from os.path import expanduser
 import os.path
 import sys
 import re
+import logging
 
 import requests, json
 
@@ -22,6 +23,7 @@ class HttpUtils:
         try:
             url=server+query
             res = requests.post(url, data, headers=header, verify=verify_ssl)
+            print('Godocker Response:',res, "\n")
 
         except requests.exceptions.ConnectionError as e:
             print('A Connection error occurred:', e)
@@ -29,11 +31,11 @@ class HttpUtils:
             if re.search("SSL3_GET_SERVER_CERTIFICATE", str(e)):
                 print("Use the --no-certificate option if you trust the remote godocker server certificate.")
 
-            sys.exit(1)
+            return False
 
         except requests.exceptions.HTTPError as e:
             print('A HTTP error occurred:', e)
-            sys.exit(1)
+            return False
 
         HttpUtils.test_status_code(res)
 
@@ -54,11 +56,11 @@ class HttpUtils:
 
         except requests.exceptions.ConnectionError as e:
             print('A Connection error occurred:', e)
-            sys.exit(1)
+            return False
 
         except requests.exceptions.HTTPError as e:
             print('A HTTP error occurred:', e)
-            sys.exit(1)
+            return False
 
         HttpUtils.test_status_code(res)
 
@@ -79,11 +81,11 @@ class HttpUtils:
 
         except requests.exceptions.ConnectionError as e:
             print('A Connection error occurred:', e)
-            sys.exit(1)
+            return False
 
         except requests.exceptions.HTTPError as e:
             print('A HTTP error occurred:', e)
-            sys.exit(1)
+            return False
 
         HttpUtils.test_status_code(res)
 
@@ -104,11 +106,11 @@ class HttpUtils:
 
         except requests.exceptions.ConnectionError as e:
             print('A Connection error occurred:', e)
-            sys.exit(1)
+            return False
 
         except requests.exceptions.HTTPError as e:
             print('A HTTP error occurred:', e)
-            sys.exit(1)
+            return False
 
         HttpUtils.test_status_code(res)
 
@@ -120,12 +122,13 @@ class HttpUtils:
 
         if httpresult.status_code == 401:
             print('Unauthorized : this server could not verify that you are authorized to access the document you requested.')
-            sys.exit(0)
 
         if httpresult.status_code == 403:
             print('Forbidden : Access was denied to this resource. Not authorized to access this resource.')
-            sys.exit(0)
 
         if httpresult.status_code == 404:
             print('Not Found : The resource could not be found.')
-            sys.exit(0)
+        
+        return False
+
+

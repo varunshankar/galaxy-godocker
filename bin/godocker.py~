@@ -157,7 +157,6 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
     def get_task(self,job_id):
         #Get job details
-        job = False
         if Auth.authenticate():
             result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id),Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
             job = result.json()
@@ -165,15 +164,13 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
     def task_suspend(self,job_id):
         #Suspend actively running job
-        job = False
-        if Auth.authenticate():
-            result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id)+"/suspend/",Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
-            job = result.json()
+        Auth.authenticate()
+        result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id)+"/suspend/",Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
+        job = result.json()
         return job
 
     def get_task_status(self,job_id):
         #Get job status
-        job = False
         if Auth.authenticate():
             result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id)+"/status/",Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
             job = result.json()
@@ -181,10 +178,9 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
     def delete_task(self,job_id):
         #Delete a job 
-        job = False
-        if Auth.authenticate():
-            result = HttpUtils.http_delete_request("/api/1.0/task/"+str(job_id),Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
-            job = result.json()
+        Auth.authenticate()
+        result = HttpUtils.http_delete_request("/api/1.0/task/"+str(job_id),Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
+        job = result.json()
         return job
     
 
