@@ -25,15 +25,22 @@ class GodockerJobRunner(AsynchronousJobRunner):
     	self.auth = None
         self.server = "https://godocker.genouest.org" #"https://docker-ui/genouest.org"
     	runner_param_specs = dict(
-    		godocker_master = dict(map = str),
-    		job_name = dict(map = str),
-    		tags = dict(map = str),
-    		desc = dict(map = str),
+    		godocker_master = dict(map = str), #Where is this used? Find out!
+    		name = dict(map = str),
+    		tags = dict(map = str,default = ""),
     		cpu = dict(map = int,valid = lambda x: int > 0,default = 1),
     		ram = dict(map = int,valid = lambda x: int > 0,default = 1),
     		image = dict(map = str), #"centos:latest","rastasheep/ubuntu-sshd","osallou/dockernode"
     		user = dict(map = str),
-    		apikey = dict(map = str)
+    		apikey = dict(map = str),
+                project = dict(map = str,default = "default"),
+                description = dict(map = str,default = ""),
+                array = dict(map = str,valid = lambda x: x in ("start","stop","step"),default=None),
+                parent = dict(map = str,default = ""),
+                external_image = dict(map = bool,default = False),
+                volume = dict(map = str,default = ""),
+                root = dict(map = bool,default = False),
+                interactive = dict(map = bool,default = False)
         )
         if 'runner_param_specs' not in kwargs:
         	kwargs['runner_param_specs'] = dict()
@@ -56,16 +63,23 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
     def queue_job(self, job_wrapper):
 
-    	job_name = self.get_unique_job_name(job_wrapper)
-    	log.debug("Starting queue_job for job " + job_name)
+    	#job_name = self.get_unique_job_name(job_wrapper)
         if not self.prepare_job(job_wrapper, include_metadata=False, include_work_dir_outputs=False):
             return
         job_destination = job_wrapper.job_destination
 
         # Create the Json object and call the godocker API here
-
-        ajs = AsynchronousJobState(files_dir = job_wrapper.working_directory,job_wrapper = job_wrapper,job_id = job_name,job_destination = job_destination)
-        self.monitor_queue.put(ajs)
+        job = self.get_job_template(job_wrapper)
+        if not job:
+            log.debug("Job creation failure!! Job cannot be started")
+        else:
+            job_id = self.post_task(job)
+            if not job_name:
+                log.debug("Job creation faliure!! No Response from GoDocker")
+            else:
+                log.debug("Starting queue_job for job " + job_id)
+                ajs = AsynchronousJobState(files_dir = job_wrapper.working_directory,job_wrapper = job_wrapper,job_id = job_id,job_destination = job_destination)
+                self.monitor_queue.put(ajs)
         
 
     def check_watched_item(self, job_state):
@@ -88,28 +102,87 @@ class GodockerJobRunner(AsynchronousJobRunner):
     def get_unique_job_name(self, job_wrapper):
         return "god-" + job_wrapper.get_id_tag()
 
+    def get_job_template(self, job_wrapper):
 
-    #GoDocker API helper functions
-
-    def login(self,apikey,login,server,noCert = False):
-
-        data=json.dumps({'user': login, 'apikey': apikey})
-        auth = HttpUtils.http_post_request("/api/1.0/authenticate",data,server,{'Content-type': 'application/json','Accept': 'application/json'},noCert)
-
-        if not auth:
-            print("Authentication Error!!")
-        else:
-            Auth.create_auth_file(apikey, login, server, noCert)
-        return auth
-
-
-    def post_task(self,job):
-
-        Auth.authenticate()
+        project = self.runner_params["project"]
+        name = self.runner_params["name"]
+        description = self.runner_params["description"]
+        tags = self.runner_params["tags"]
+        cpu = self.runner_params["cpu"]
+        ram = self.runner_params["ram"]
+        array = self.runner_params["array"]
+        parent = self.runner_params["parent"]
+        image = self.runner_params["image"]
+        external_image = self.runner_params["external_image"]
+        volume = self.runner_params["volume"]
+        root = self.runner_params["root"]
+        interactive = self.runner_params["interactive"]
+        cmd = self.runner_params["cmd"]
+        script = self.runner_params["script"]
         
-        # TODO fill the job template. 
-        #Job template
-        """
+        Auth.authenicate()
+
+        # manage volumes
+        '''
+        HTTP POST url:"/api/1.0/config"
+        '''
+        volumes=[]
+        for volume in list(volume):
+            acl = Utils.get_acl_for_volume(volume)
+            volumes.append({'name': volume, 'acl': str(acl)})
+
+        # manage constraints
+        labels = []
+        available_labels = Utils.get_contraint_labels()
+        for user_label in list(label):
+            if user_label not in available_labels:
+                print("Constraint '"+user_label+" does not exist. Please choose in the list below:")
+                for available_label in available_labels:
+                    print(" "+available_label)
+                return False
+            else:
+                labels.append(user_label)
+
+        # test image selection
+        if not image in Utils.get_docker_images_url() and not external_image:
+            print("Wrong image url selected. Please launch 'godimage list' to check your image url or use the --external_image.")
+            return False
+
+        if (not script and not cmd and not interactive):
+            print("You must use either --script/--cmd or --interactive option")
+            return False
+
+        if interactive and image not in Utils.get_docker_images_url_interactive():
+            print("You are not allowed to use this image with interactive mode. Please launch 'godimage list' to check your image url")
+            return False
+        
+        # command
+        #Not sure of this. How does a tool program executed by this, as galaxy supports multiple programming languages for tool creation
+        command = ''
+        if script:
+            command = script.read()
+        if cmd:
+            command = cmd
+        '''
+        if env is not None and env:
+            template_vars = {}
+            for envvar in env:
+                if envvar not in os.environ:
+                    print("Environment variable %s is not defined" % envvar)
+                    return False
+                template_vars[envvar] = os.environ[envvar]
+            command = Template(command).safe_substitute(template_vars)
+        '''
+
+        #tags
+        tags_tab = tags.split(",")
+
+        # manage depends
+        tasks_depends = []
+        if parent:
+            tasks_depends = parent.split(",")
+            
+        user_infos = Utils.get_userInfos(Auth.login)
         job = {
         'user' : {
             'id' : user_infos['id'],
@@ -148,12 +221,31 @@ class GodockerJobRunner(AsynchronousJobRunner):
         'status': {
             'primary': None,
             'secondary': None
+            }
         }
+        return job
 
-      }
-        """
+
+    #GoDocker API helper functions
+
+    def login(self,apikey,login,server,noCert = False):
+
+        data=json.dumps({'user': login, 'apikey': apikey})
+        auth = HttpUtils.http_post_request("/api/1.0/authenticate",data,server,{'Content-type': 'application/json','Accept': 'application/json'},noCert)
+
+        if not auth:
+            print("Authentication Error!!")
+        else:
+            Auth.create_auth_file(apikey, login, server, noCert)
+        return auth
+
+
+    def post_task(self,job):
+        #Sumbit job to godocker
+        Auth.authenticate()
         result = HttpUtils.http_post_request("/api/1.0/task",json.dumps(job),Auth.server,{'Authorization':'Bearer '+Auth.token,'Content-type': 'application/json', 'Accept':'application/json'},Auth.noCert)
         log.debug("Response from godocker: "+ str(result.json()['msg']) + " ID: " + int(result.json()['id']))
+        return result
 
     def get_task(self,job_id):
         #Get job details
@@ -167,7 +259,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         #Suspend actively running job
         job = False
         if Auth.authenticate():
-            result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id)+"/suspend/",Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
+            result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id)+"/suspend",Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
             job = result.json()
         return job
 
@@ -175,7 +267,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         #Get job status
         job = False
         if Auth.authenticate():
-            result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id)+"/status/",Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
+            result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id)+"/status",Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
             job = result.json()
         return job
 
