@@ -660,7 +660,7 @@
              the container of choice in Kubernetes.
         -->
                 <tool id="my-tool" destination="my-tool-container"/>
-                <tool id="wc_gnu" destination="god" />
+                <tool id="my_test_tool" destination="god" />
             </tools>
             <limits>
                 <!-- Certain limits can be defined. The 'concurrent_jobs' limits all
