@@ -16,7 +16,7 @@ def test_login(apikey,login,server,noCert = False):
 
 
 if __name__ == "__main__":
-   auth = test_login("DKZPM1NDE3","gosc","http://cloud-30.genouest.org")
+   auth = test_login("DKZPM1NDE31","gosc","http://cloud-30.genouest.org")
    #print auth
    memb = inspect.getmembers(auth)
    for i in memb:

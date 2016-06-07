@@ -27,7 +27,6 @@ def get_job_template(job_wrapper):
         log.debug("Command: ")
         log.debug(command)
         user_infos = Utils.get_userInfos(Auth.login)
-
         job = {
         'user' : {
             'id' : user_infos['id'],
