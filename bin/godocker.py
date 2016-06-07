@@ -202,6 +202,8 @@ class GodockerJobRunner(AsynchronousJobRunner):
         '''
         god_job_cmd = "#!/bin/bash\n"+"cd"+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
         command = god_job_cmd
+        log.debug("Command: ")
+        log.debug(command)
         user_infos = Utils.get_userInfos(Auth.login)
         job = {
         'user' : {
