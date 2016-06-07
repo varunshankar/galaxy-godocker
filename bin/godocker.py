@@ -133,10 +133,11 @@ class GodockerJobRunner(AsynchronousJobRunner):
         job_destination = job_wrapper.job_destination
         docker_repo = job_destination.params["docker_repo_override"]
         docker_owner = job_destination.params["docker_owner_override"]
-        docker_image = job_destination.params["docker_image_override"]
+        #docker_image = job_destination.params["docker_image_override"]
+        docker_image = job_destination.params["docker_default_container_id"]
         docker_tags = job_destination.params["docker_tag_override"]
         docker_cpu = job_destination.params["docker_cpu"]
-        docker_ram = job_destination.params["docker_ram"]
+        docker_ram = job_destination.params["docker_memory"]
         Auth.authenticate()
 
         # manage volumes

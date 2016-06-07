@@ -619,11 +619,12 @@
             <param id="docker_image_override">centos:latest</param>
             <param id="docker_tag_override">latest</param>
             <param id="docker_cpu">1</param>
-            <param id="docker_ram">1</param>
+            <param id="docker_memory">2</param>
+			<param id="docker_default_container_id">busybox:ubuntu-14.04</param>
             <!-- You can also allow the destination to accept the docker container set in the tool, and only fall into the docker image set by this destination if the tool doesn't set a docker container, by using the "default" suffix instead of "override".
                 <param id="docker_repo_default">my-docker-registry.org</param><param id="docker_owner_default">superbioinfo</param><param id="docker_image_default">my-tool</param><param id="docker_tag_default">latest</param>
             -->
-            <destination>
+            </destination>
                 <!-- Templatized destinations - macros can be used to create templated
         destinations with reduced XML duplication. Here we are creating 4 destinations in 4 lines instead of 28 using the macros defined below.
         -->
