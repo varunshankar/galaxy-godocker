@@ -1,8 +1,6 @@
 import logging
 import os
 import json
-import time
-from datetime import datetime
 
 from galaxy import model
 from galaxy.jobs.runners import AsynchronousJobState, AsynchronousJobRunner
@@ -203,7 +201,6 @@ class GodockerJobRunner(AsynchronousJobRunner):
         if parent:
             tasks_depends = parent.split(",")
         '''
-        dt = datetime.now()
         god_job_cmd = "#!/bin/bash\n"+"cd"+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
         command = god_job_cmd
         log.debug("Command: ")
