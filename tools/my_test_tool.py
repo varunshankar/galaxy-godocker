@@ -13,7 +13,7 @@ if __name__ == "__main__":
         name = sys.argv[1]
         age = str( sys.argv[2])
         msg = name + age
-        sys.stdout.write(ms)
+        sys.stdout.write(msg)
     except:
         sys.stderr.write(msg)
         sys.exit()
