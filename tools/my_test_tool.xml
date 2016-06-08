@@ -1,7 +1,7 @@
 <tool id="my_test_tool" name="Galaxy-Godocker Test Tool" version="1.0.0">
   <description>Testing Tool</description>
   <command interpreter="python">
-    #my_test_tool.py $name $age $output1
+    my_test_tool.py $name $age $output1
   </command>
   <inputs>
     <param name="name" type="text" size="30" value="name" label="Username"/>
