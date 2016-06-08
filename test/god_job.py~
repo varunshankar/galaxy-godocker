@@ -281,7 +281,7 @@ def create(name, description="", tags="", project="default", cpu=1, ram=1, image
 
     if tmp_storage:
         job['requirements']['tmpstorage']= {'size': tmp_storage, 'path': None}
-    print job
+   
     result_submit = HttpUtils.http_post_request(
         "/api/1.0/task", json.dumps(job),
         Auth.server,

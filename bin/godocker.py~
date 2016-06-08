@@ -153,7 +153,6 @@ class GodockerJobRunner(AsynchronousJobRunner):
         '''
         parent = ""
         label = ""
-        array = ""
         volume = "home"
         volumes=[]
         for volume in list(volume):
