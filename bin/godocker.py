@@ -48,6 +48,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         	kwargs['runner_param_specs'] = dict()
         
         kwargs['runner_param_specs'].update(runner_param_specs)
+        super(GodockerJobRunner, self).__init__(app, nworkers, **kwargs)
         
         log.debug("runner_params before godocker login: \n")
         log.debug(self.runner_params)
@@ -59,7 +60,6 @@ class GodockerJobRunner(AsynchronousJobRunner):
         if not self.auth:
             log.debug("Authentication failure!! Job cannot be started")
         else:
-            super(GodockerJobRunner, self).__init__(app, nworkers, **kwargs)
             """ Following methods starts threads.
                 threading.Thread(name,target) invokes methods monitor() and run_next()
             """
@@ -97,7 +97,10 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
     def check_watched_item(self, job_state):
         # Get the job current status from godocker using jobid
-        job = self.get_task(job_state.job_id)
+        #job = self.get_task(job_state.job_id)
+        job_state.running = False
+        self.mark_as_failed(job_state)
+        return None
         
         # Possible Job states: state["secondary"]= suspended | running | kill requested | suspend requested
         #Update the job status to galaxy here
@@ -204,7 +207,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
             tasks_depends = parent.split(",")
         '''
         dt = datetime.now()
-        god_job_cmd = "#!/bin/bash\n"+"cd"+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
+        god_job_cmd = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
         command = god_job_cmd
         log.debug("Command: ")
         log.debug(command)
@@ -255,7 +258,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
     #GoDocker API helper functions
 
     def login(self,apikey,login,server,noCert = False):
-
+        log.warn("GODOCKER LOGIN: "+str(login)+":"+str(apikey))
         data=json.dumps({'user': login, 'apikey': apikey})
         auth = HttpUtils.http_post_request("/api/1.0/authenticate",data,server,{'Content-type': 'application/json','Accept': 'application/json'},noCert)
 
@@ -269,7 +272,9 @@ class GodockerJobRunner(AsynchronousJobRunner):
     def post_task(self,job):
         #Sumbit job to godocker
         Auth.authenticate()
+        log.debug("GODOCKER task: "+json.dumps(job))
         result = HttpUtils.http_post_request("/api/1.0/task",json.dumps(job),Auth.server,{'Authorization':'Bearer '+Auth.token,'Content-type': 'application/json', 'Accept':'application/json'},Auth.noCert)
+        log.debug(result.text)
         log.debug("Response from godocker: "+ str(result.json()['msg']) + " ID: " + int(result.json()['id']))
         return result
 
