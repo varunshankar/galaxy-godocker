@@ -2,6 +2,7 @@ import logging
 import os
 import json
 import time
+import inspect
 from datetime import datetime
 
 from galaxy import model
@@ -76,7 +77,8 @@ class GodockerJobRunner(AsynchronousJobRunner):
         job_destination = job_wrapper.job_destination
         log.debug("JOB_WRAPPER")
         log.warn(job_wrapper)
-
+        self.get_structure(job_wrapper)
+        log.debug("END OF JOB_WRAPPER \n")
         # Create the Json object and call the godocker API here
         job = self.get_job_template(job_wrapper)
         if not job:
@@ -119,7 +121,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         return "god-" + job_wrapper.get_id_tag()
 
     def get_job_template(self, job_wrapper):
-
+        log.debug("\n INSIDE JOB CREATION TEMPLATE \n")
         #project = self.runner_params["project"]
         #name = self.runner_params["name"]
         #description = self.runner_params["description"]
@@ -209,9 +211,12 @@ class GodockerJobRunner(AsynchronousJobRunner):
         dt = datetime.now()
         god_job_cmd = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
         command = god_job_cmd
-        log.debug("Command: ")
+        log.debug("\n Command: ")
         log.debug(command)
-        user_infos = Utils.get_userInfos(Auth.login)
+        try:
+            user_infos = Utils.get_userInfos(Auth.login)
+        except:
+            user_infos = {'id':Auth.login, 'uid':Auth.login, 'gid':Auth.login}
         job = {
         'user' : {
             'id' : user_infos['id'],
@@ -252,30 +257,41 @@ class GodockerJobRunner(AsynchronousJobRunner):
             'secondary': None
             }
         }
+        log.debug("JOB TEMPLATE: ")
+        log.debug(job)
+        log.debug("END OF JOB TEMPLATE \n")
         return job
 
 
     #GoDocker API helper functions
 
     def login(self,apikey,login,server,noCert = False):
+        log.debug("LOGIN TASK TO BE EXECUTED \n")
         log.warn("GODOCKER LOGIN: "+str(login)+":"+str(apikey))
         data=json.dumps({'user': login, 'apikey': apikey})
-        auth = HttpUtils.http_post_request("/api/1.0/authenticate",data,server,{'Content-type': 'application/json','Accept': 'application/json'},noCert)
-
+        auth = HttpUtils.http_post_request("/api/1.0/authenticate",data,server,{'Content-type': 'application/json','Accept': 'application/json'},"False")
+        self.get_structure(auth)
+        
         if not auth:
             print("Authentication Error!!")
         else:
             Auth.create_auth_file(apikey, login, server, noCert)
+            auth = auth.json()['token']
+            log.debug(auth)
+        log.debug("END OF LOGIN TASK \n")
         return auth
 
 
     def post_task(self,job):
         #Sumbit job to godocker
         Auth.authenticate()
+        log.debug("\n JOB POST TASK TO BE EXECUTED \n")
         log.debug("GODOCKER task: "+json.dumps(job))
-        result = HttpUtils.http_post_request("/api/1.0/task",json.dumps(job),Auth.server,{'Authorization':'Bearer '+Auth.token,'Content-type': 'application/json', 'Accept':'application/json'},Auth.noCert)
+        result = HttpUtils.http_post_request("/api/1.0/task",json.dumps(job),Auth.server,{'Authorization':'Bearer '+self.auth,'Content-type': 'application/json', 'Accept':'application/json'},Auth.noCert)
+        self.get_structure(result)
         log.debug(result.text)
         log.debug("Response from godocker: "+ str(result.json()['msg']) + " ID: " + int(result.json()['id']))
+        log.debug("END OF JOB POST TASK\n")
         return result
 
     def get_task(self,job_id):
@@ -309,6 +325,15 @@ class GodockerJobRunner(AsynchronousJobRunner):
             result = HttpUtils.http_delete_request("/api/1.0/task/"+str(job_id),Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
             job = result.json()
         return job
+
+    def get_structure(self,obj):
+        log.debug("\n STRUCTURE \n")
+        memb = inspect.getmembers(obj)
+        for i in memb:
+            log.debug(i)
+        log.debug("\n END OF STRUCTURE \n")
+        return
+
     
 
 
