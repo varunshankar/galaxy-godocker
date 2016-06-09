@@ -87,7 +87,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         job_id = self.post_task(job_wrapper)
         log.debug("Job response from GoDocker")
         log.debug(job_id)
-        if not job_name:
+        if not job_id:
             log.debug("Job creation faliure!! No Response from GoDocker")
         else:
             log.debug("Starting queue_job for job " + job_id)
@@ -118,121 +118,6 @@ class GodockerJobRunner(AsynchronousJobRunner):
     #Helper functions
     def get_unique_job_name(self, job_wrapper):
         return "god-" + job_wrapper.get_id_tag()
-    '''
-    def get_job_template(self, job_wrapper):
-        log.debug("\n INSIDE JOB CREATION TEMPLATE \n")
-        #project = self.runner_params["project"]
-        #name = self.runner_params["name"]
-        #description = self.runner_params["description"]
-        #tags = self.runner_params["tags"]
-        #cpu = self.runner_params["cpu"]
-        #ram = self.runner_params["ram"]
-        #array = self.runner_params["array"]
-        #parent = self.runner_params["parent"]
-        #image = self.runner_params["image"]
-        #external_image = self.runner_params["external_image"]
-        #volume = self.runner_params["volume"]
-        #root = self.runner_params["root"]
-        #interactive = self.runner_params["interactive"]
-        #cmd = self.runner_params["cmd"]
-        #script = self.runner_params["script"]
-        job_destination = job_wrapper.job_destination
-        docker_repo = job_destination.params["docker_repo_override"]
-        docker_owner = job_destination.params["docker_owner_override"]
-        #docker_image = job_destination.params["docker_image_override"]
-        docker_image = job_destination.params["docker_default_container_id"]
-        docker_tags = job_destination.params["docker_tag_override"]
-        docker_cpu = job_destination.params["docker_cpu"]
-        docker_ram = job_destination.params["docker_memory"]
-        Auth.authenticate()
-
-        # manage volumes
-        
-        #HTTP POST url:"/api/1.0/config"
-        
-        parent = ""
-        label = ""
-        array = ""
-        volume = "home"
-        volumes=[]
-        for volume in list(volume):
-            acl = Utils.get_acl_for_volume(volume)
-            volumes.append({'name': volume, 'acl': str(acl)})
-        
-        # manage constraints
-        labels = []
-        available_labels = Utils.get_contraint_labels()
-        for user_label in list(label):
-            if user_label not in available_labels:
-                print("Constraint '"+user_label+" does not exist. Please choose in the list below:")
-                for available_label in available_labels:
-                    print(" "+available_label)
-                return False
-            else:
-                labels.append(user_label)
-
-        #tags
-        tags_tab = docker_tags.split(",")
-
-        # manage depends
-        tasks_depends = []
-        if parent:
-            tasks_depends = parent.split(",")
-        
-        dt = datetime.now()
-        god_job_cmd = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
-        command = god_job_cmd
-        log.debug("\n Command: ")
-        log.debug(command)
-        try:
-            user_infos = Utils.get_userInfos(Auth.login)
-        except:
-            user_infos = {'id':Auth.login, 'uid':Auth.login, 'gid':Auth.login}
-        job = {
-        'user' : {
-            'id' : user_infos['id'],
-            'uid' : user_infos['uid'],
-            'gid' : user_infos['gid'],
-            'project' : "default"
-        },
-        'date': time.mktime(dt.timetuple()),
-        'meta': {
-            'name': "testjob", #name,
-            'description': "", #description,
-            'tags': tags_tab
-        },
-        'requirements': {
-            'cpu': docker_cpu, #cpu,
-            'ram': docker_ram, #ram,
-            'array': { 'values': array},
-            'label': labels,
-	    'tasks': tasks_depends,
-            'tmpstorage': None
-        },
-        'container': {
-            'image': str(docker_image),
-            'volumes': volumes,
-            'network': True,
-            'id': None,
-            'meta': None,
-            'stats': None,
-            'ports': [],
-            'root': False #root
-        },
-        'command': {
-            'interactive': False,
-            'cmd': command,
-        },
-        'status': {
-            'primary': None,
-            'secondary': None
-            }
-        }
-        log.debug("JOB TEMPLATE: ")
-        log.debug(job)
-        log.debug("END OF JOB TEMPLATE \n")
-        return job
-    '''
 
     #GoDocker API helper functions
 
@@ -267,7 +152,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
         
         #volume = "home"
-        docker_image="centos:latest"
+        #docker_image="centos:latest"
         volumes=[]
         labels=[]
         #tags
@@ -339,9 +224,9 @@ class GodockerJobRunner(AsynchronousJobRunner):
         )
         #self.get_structure(result)
         log.debug(result.text)
-        log.debug("Response from godocker: "+ str(result.json()['msg']) + " ID: " + int(result.json()['id']))
+        log.debug("Response from godocker: "+ str(result.json()['msg']) + " ID: " + str(result.json()['id']))
         log.debug("END OF JOB POST TASK\n")
-        return result
+        return str(result.json()['id'])
 
     def get_task(self,job_id):
         #Get job details
