@@ -80,20 +80,19 @@ class GodockerJobRunner(AsynchronousJobRunner):
         self.get_structure(job_wrapper)
         log.debug("END OF JOB_WRAPPER \n")
         # Create the Json object and call the godocker API here
-        job = self.get_job_template(job_wrapper)
-        if not job:
-            log.debug("Job creation failure!! Job cannot be started")
+        #job = self.get_job_template(job_wrapper)
+        #if not job:
+        #    log.debug("Job creation failure!! Job cannot be started")
+        #else:
+        job_id = self.post_task(job_wrapper)
+        log.debug("Job response from GoDocker")
+        log.debug(job_id)
+        if not job_name:
+            log.debug("Job creation faliure!! No Response from GoDocker")
         else:
-            job_id = self.post_task(job)
-            log.debug("Job response from GoDocker")
-            log.debug(job_id)
-            if not job_name:
-                log.debug("Job creation faliure!! No Response from GoDocker")
-            else:
-                log.debug("Starting queue_job for job " + job_id)
-                ajs = AsynchronousJobState(files_dir = job_wrapper.working_directory,job_wrapper = job_wrapper,job_id = job_id,job_destination = job_destination)
-                self.monitor_queue.put(ajs)
-        
+            log.debug("Starting queue_job for job " + job_id)
+            ajs = AsynchronousJobState(files_dir = job_wrapper.working_directory,job_wrapper = job_wrapper,job_id = job_id,job_destination = job_destination)
+            self.monitor_queue.put(ajs)
         return None
 
 
@@ -119,7 +118,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
     #Helper functions
     def get_unique_job_name(self, job_wrapper):
         return "god-" + job_wrapper.get_id_tag()
-
+    '''
     def get_job_template(self, job_wrapper):
         log.debug("\n INSIDE JOB CREATION TEMPLATE \n")
         #project = self.runner_params["project"]
@@ -148,9 +147,9 @@ class GodockerJobRunner(AsynchronousJobRunner):
         Auth.authenticate()
 
         # manage volumes
-        '''
-        HTTP POST url:"/api/1.0/config"
-        '''
+        
+        #HTTP POST url:"/api/1.0/config"
+        
         parent = ""
         label = ""
         array = ""
@@ -173,7 +172,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
                 labels.append(user_label)
 
         #tags
-        #tags_tab = tags.split(",")
+        tags_tab = docker_tags.split(",")
 
         # manage depends
         tasks_depends = []
@@ -200,7 +199,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         'meta': {
             'name': "testjob", #name,
             'description': "", #description,
-            'tags': docker_tags #tags_tab
+            'tags': tags_tab
         },
         'requirements': {
             'cpu': docker_cpu, #cpu,
@@ -233,7 +232,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         log.debug(job)
         log.debug("END OF JOB TEMPLATE \n")
         return job
-
+    '''
 
     #GoDocker API helper functions
 
@@ -254,18 +253,91 @@ class GodockerJobRunner(AsynchronousJobRunner):
         return auth
 
 
-    def post_task(self,job):
+    def post_task(self,job_wrapper):
         #Sumbit job to godocker
         Auth.authenticate()
+        log.debug("\n INSIDE JOB CREATION TEMPLATE \n")
+        job_destination = job_wrapper.job_destination
+        docker_repo = job_destination.params["docker_repo_override"]
+        docker_owner = job_destination.params["docker_owner_override"]
+        docker_image = job_destination.params["docker_default_container_id"]
+        docker_tags = job_destination.params["docker_tag_override"]
+        docker_cpu = job_destination.params["docker_cpu"]
+        docker_ram = job_destination.params["docker_memory"]
+
+        
+        #volume = "home"
+        docker_image="centos:latest"
+        volumes=[]
+        labels=[]
+        #tags
+        #tags_tab = docker_tags.split(",")
+        tags_tab = ['galaxy','godocker_test_tool']
+
+        # manage depends
+        tasks_depends = []
+        name = "godockerRunner"
+        description= "example job"
+        array = None
+        project = "galaxy"
+        
+        dt = datetime.now()
+        god_job_cmd = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
+        command = god_job_cmd
+        log.debug("\n Command: ")
+        log.debug(command)
+
+        job = {
+        'user' : {
+            #'id' : user_infos['id'],
+            #'uid' : user_infos['uid'],
+            #'gid' : user_infos['gid'],
+            'project' : project
+        },
+        'date': time.mktime(dt.timetuple()),
+        'meta': {
+            'name': name,
+            'description': description,
+            'tags': tags_tab
+        },
+        'requirements': {
+            'cpu': int(docker_cpu), #cpu,
+            'ram': int(docker_ram), #ram,
+            'array': { 'values': array},
+            'label': labels,
+	    'tasks': tasks_depends,
+            'tmpstorage': None
+        },
+        'container': {
+            'image': str(docker_image),
+            'volumes': volumes,
+            'network': True,
+            'id': None,
+            'meta': None,
+            'stats': None,
+            'ports': [],
+            'root': False #root
+        },
+        'command': {
+            'interactive': False,
+            'cmd': command,
+        },
+        'status': {
+            'primary': None,
+            'secondary': None
+            }
+        }
+        log.debug("JOB TEMPLATE: ")
+        log.debug(job)
+        log.debug("END OF JOB TEMPLATE \n")
         log.debug("\n JOB POST TASK TO BE EXECUTED \n")
-        log.debug("GODOCKER task: "+json.dumps(job))
-        result_submit = HttpUtils.http_post_request(
+        result = HttpUtils.http_post_request(
            "/api/1.0/task", json.dumps(job),
            Auth.server,
            {'Authorization':'Bearer '+Auth.token, 'Content-type': 'application/json', 'Accept':'application/json'},
            Auth.noCert
         )
-        self.get_structure(result)
+        #self.get_structure(result)
         log.debug(result.text)
         log.debug("Response from godocker: "+ str(result.json()['msg']) + " ID: " + int(result.json()['id']))
         log.debug("END OF JOB POST TASK\n")
