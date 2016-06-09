@@ -98,7 +98,11 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
     def check_watched_item(self, job_state):
         # Get the job current status from godocker using jobid
-        #job = self.get_task(job_state.job_id)
+        job = self.get_task(job_state.job_id)
+        print("\n JOB STATUS FROM GODOCKER \n")
+        #self.get_structure(job)
+        print job
+        print("\nEND OF JOB STATUS\n")
         job_state.running = False
         self.mark_as_failed(job_state)
         return None
@@ -152,7 +156,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
         
         #volume = "home"
-        #docker_image="centos:latest"
+        docker_image="centos:latest"
         volumes=[]
         labels=[]
         #tags
