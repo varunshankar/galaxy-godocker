@@ -254,7 +254,7 @@ if __name__ == "__main__":
    #job = get_job_template()
    #print post_task(job,auth)
    #godjob create -n job_name -d "example job" -i centos:latest -s script_to_execute.sh -v home
-   create(name="test6",description="example job",image="centos:latest",script="demo.sh")#,volume="home")
+   create(name="test_gettask",description="example job",image="centos:latest",script="demo.sh")#,volume="home")
    
 
 

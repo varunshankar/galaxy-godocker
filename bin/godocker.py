@@ -28,22 +28,9 @@ class GodockerJobRunner(AsynchronousJobRunner):
     	self.auth = None
         #self.server = "https://godocker.genouest.org" #"https://docker-ui/genouest.org"
     	runner_param_specs = dict(
-    		godocker_master = dict(map = str), #Where is this used? Find out!
-    		#name = dict(map = str),
-    		#tags = dict(map = str,default = ""),
-    		#cpu = dict(map = int,valid = lambda x: int > 0,default = 1),
-    		#ram = dict(map = int,valid = lambda x: int > 0,default = 1),
-    		#image = dict(map = str), #"centos:latest","rastasheep/ubuntu-sshd","osallou/dockernode"
+    		godocker_master = dict(map = str),
     		user = dict(map = str),
-    		key = dict(map = str),
-                #project = dict(map = str,default = "default"),
-                #description = dict(map = str,default = ""),
-                #array = dict(map = str,valid = lambda x: x in ("start","stop","step"),default=None),
-                #parent = dict(map = str,default = ""),
-                #external_image = dict(map = bool,default = False),
-                #volume = dict(map = str,default = ""),
-                #root = dict(map = bool,default = False),
-                #interactive = dict(map = bool,default = False)
+    		key = dict(map = str)
         )
         if 'runner_param_specs' not in kwargs:
         	kwargs['runner_param_specs'] = dict()
@@ -76,14 +63,11 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
         job_destination = job_wrapper.job_destination
         log.debug("JOB_WRAPPER")
-        log.warn(job_wrapper)
-        self.get_structure(job_wrapper)
+        #log.warn(job_wrapper)
+        #self.get_structure(job_wrapper)
+        #self.get_structure(job_wrapper.tool)
+        #log.debug(job_wrapper.tool.name)
         log.debug("END OF JOB_WRAPPER \n")
-        # Create the Json object and call the godocker API here
-        #job = self.get_job_template(job_wrapper)
-        #if not job:
-        #    log.debug("Job creation failure!! Job cannot be started")
-        #else:
         job_id = self.post_task(job_wrapper)
         log.debug("Job response from GoDocker")
         log.debug(job_id)
@@ -98,14 +82,16 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
     def check_watched_item(self, job_state):
         # Get the job current status from godocker using jobid
-        job = self.get_task(job_state.job_id)
+        job_status = self.get_task_status(job_state.job_id)
         print("\n JOB STATUS FROM GODOCKER \n")
-        #self.get_structure(job)
         print job
+        #self.get_structure(job)
         print("\nEND OF JOB STATUS\n")
-        job_state.running = False
-        self.mark_as_failed(job_state)
-        return None
+        if job_status.primary == "over":
+            job_state.running = False
+            self.mark_as_failed(job_state)
+        
+        return job_state
         
         # Possible Job states: state["secondary"]= suspended | running | kill requested | suspend requested
         #Update the job status to galaxy here
@@ -156,16 +142,16 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
         
         #volume = "home"
-        docker_image="centos:latest"
+        #docker_image="centos:latest"
         volumes=[]
         labels=[]
         #tags
         #tags_tab = docker_tags.split(",")
-        tags_tab = ['galaxy','godocker_test_tool']
+        tags_tab = ['galaxy',job_wrapper.tool.id]
 
         # manage depends
         tasks_depends = []
-        name = "godockerRunner"
+        name = job_wrapper.tool.name
         description= "example job"
         array = None
         project = "galaxy"
@@ -271,7 +257,10 @@ class GodockerJobRunner(AsynchronousJobRunner):
             log.debug(i)
         log.debug("\n END OF STRUCTURE \n")
         return
-
     
-
+    def get_all_members_recursive(self,obj):
+        print inspect.getmembers(obj)
+        for i in inspect.getmembers(obj):
+            if "object" in str(i[1]) or "instance" in str(i[1]):
+                self.get_all_members_recursive(i[1])
 
