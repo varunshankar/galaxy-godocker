@@ -82,14 +82,25 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
     def check_watched_item(self, job_state):
         # Get the job current status from godocker using jobid
-        job_status = self.get_task_status(job_state.job_id)
+        job_status_god = self.get_task_status(job_state.job_id)
         print("\n JOB STATUS FROM GODOCKER \n")
-        print job
+        log.debug(job_status_god)
         #self.get_structure(job)
         print("\nEND OF JOB STATUS\n")
-        if job_status.primary == "over":
+        if job_status_god['status']['primary'] == "over":
+            job_state.running = False
+            self.mark_as_finished(job_state)
+            return None
+        
+        elif job_status_god['status']['primary'] == "running":
+            job_state.running = True
+        
+        elif job_status_god['status']['primary'] == "pending":
+            return job_state
+        else:
             job_state.running = False
             self.mark_as_failed(job_state)
+            return None
         
         return job_state
         
@@ -100,7 +111,9 @@ class GodockerJobRunner(AsynchronousJobRunner):
     def stop_job(self,job):
     	#Call the godocker API here
         #Update the status to galaxy
-        return
+        log.debug(job)
+        self.delete_task(job.job_id)
+        return None
     
     def recover(self,job):
     	pass
