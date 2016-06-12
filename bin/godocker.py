@@ -64,9 +64,6 @@ class GodockerJobRunner(AsynchronousJobRunner):
         job_destination = job_wrapper.job_destination
         log.debug("JOB_WRAPPER")
         #log.warn(job_wrapper)
-        #self.get_structure(job_wrapper)
-        #self.get_structure(job_wrapper.tool)
-        #log.debug(job_wrapper.tool.name)
         log.debug("END OF JOB_WRAPPER \n")
         job_id = self.post_task(job_wrapper)
         log.debug("Job response from GoDocker")
@@ -82,27 +79,47 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
     def check_watched_item(self, job_state):
         # Get the job current status from godocker using jobid
+        ''' This function is called by check_watched_items()  where param job_state is an object of AsynchronousJobState
+            Expected return type of this function is None or AsynchronousJobState object with updated running status
+        '''
         job_status_god = self.get_task_status(job_state.job_id)
+        
         print("\n JOB STATUS FROM GODOCKER \n")
-        log.debug(job_status_god)
-        #self.get_structure(job)
+        #log.debug(job_status_god)
+        #self.get_structure(job_state)
         print("\nEND OF JOB STATUS\n")
+        
         if job_status_god['status']['primary'] == "over":
-            job_state.running = False
+            #job_state.running = False
+            job_state.job_wrapper.change_state(model.Job.states.OK)
             self.mark_as_finished(job_state)
+            ''' This function executes: self.work_queue.put( ( self.finish_job, job_state ) )
+                self.finish_job -> 
+                                job_state.job_wrapper.finish( stdout, stderr, exit_code )
+                                job_state.job_wrapper.reclaim_ownership()
+                                job_state.cleanup()
+                self.work_queue.put( method , arg ) -> 
+                                                    The run_next() method starts execution on starting worker threads. 
+                                                    This run_next() method executes method(arg) by self.work_queue.get()
+                                                    Possible outcomes of finish_job(job_state) -> 
+                                                                       job_state.job_wrapper.finish( stdout, stderr, exit_code )
+                                                                       job_state.job_wrapper.fail( "Unable to finish job", exception=True)
+            '''
             return None
         
         elif job_status_god['status']['primary'] == "running":
             job_state.running = True
+            job_state.job_wrapper.change_state(model.Job.states.RUNNING)
+            return job_state
         
         elif job_status_god['status']['primary'] == "pending":
+            #job_state.job_wrapper.change_state(model.Job.states.WAITING or QUEUED)
             return job_state
+        
         else:
             job_state.running = False
             self.mark_as_failed(job_state)
             return None
-        
-        return job_state
         
         # Possible Job states: state["secondary"]= suspended | running | kill requested | suspend requested
         #Update the job status to galaxy here
@@ -110,7 +127,10 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
     def stop_job(self,job):
     	#Call the godocker API here
-        #Update the status to galaxy
+        '''This function is called by fail_job() 
+           where param job = self.sa_session.query( self.app.model.Job ).get( job_state.job_wrapper.job_id )
+           No Return data expected 
+        '''  
         log.debug(job)
         self.delete_task(job.job_id)
         return None
