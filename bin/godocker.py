@@ -87,8 +87,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         
         print("\n JOB STATUS FROM GODOCKER \n")
         log.debug(job_status_god)
-        self.get_structure(job_status_god)
-        #self.get_structure(job_state)
+        #self.get_structure(job_status_god)
         print("\nEND OF JOB STATUS\n")
         
         if job_status_god['status']['primary'] == "over" and job_status_god['status']['exitcode'] == 0 :
@@ -136,7 +135,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
            No Return data expected 
         '''  
         log.debug(job)
-        self.delete_task(job.job_id)
+        self.delete_task(job)
         return None
     
     def recover(self,job):
@@ -313,7 +312,9 @@ class GodockerJobRunner(AsynchronousJobRunner):
     def delete_task(self,job_id):
         #Delete a job 
         job = False
-        if Auth.authenticate():
+        t = {"server":Auth.server,"noCert":Auth.noCert,"token":Auth.token,"login":Auth.login,"apikey":Auth.apikey}
+        log.debug(t)
+        if Auth.token:
             result = HttpUtils.http_delete_request("/api/1.0/task/"+str(job_id),Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
             job = result.json()
         return job
