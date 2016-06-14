@@ -90,7 +90,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         #self.get_structure(job_status_god)
         print("\nEND OF JOB STATUS\n")
         
-        if job_status_god['status']['primary'] == "over" and job_status_god['status']['exitcode'] == 0 :
+        if job_status_god['status']['primary'] == "over":
             job_state.running = False
             job_state.job_wrapper.change_state(model.Job.states.OK)
             self.create_log_file(job_state,job_status_god)
@@ -149,25 +149,34 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
     def create_log_file(self, job_state, job_status_god):
         log = ""
-        src = str(job_status_god['container']['volumes'][1]['path'])
-        god_output_file = src+"/god.log"
-        god_error_file = src+"/god.err"
-        f = open(god_output_file,"r")
-        out_log = f.read()
-        log_file = open(job_state.output_file,"w")
-        log_file.write(out_log)
-        log_file.close()
-        f.close()
-        f = open(god_error_file,"r")
-        out_log = f.read()
-        log_file = open(job_state.error_file,"w")
-        log_file.write(out_log)
-        log_file.close()
-        f.close()
-        print("\nPRINT OUTPUT FILE: ")
-        print(job_state.output_file)
-        print("\nPRINT ERROR FILE: ")
-        print(job_state.error_file)
+        path = None
+        for vol in job_status_god['container']['volumes']:
+            if vol['name']=="go-docker":
+                path = str(vol['path'])
+        if path:
+            god_output_file = path+"/god.log"
+            god_error_file = path+"/god.err"
+            f = open(god_output_file,"r")
+            out_log = f.read()
+            log_file = open(job_state.output_file,"w")
+            log_file.write(out_log)
+            log_file.close()
+            f.close()
+            f = open(god_error_file,"r")
+            out_log = f.read()
+            log_file = open(job_state.error_file,"w")
+            log_file.write(out_log)
+            log_file.close()
+            f.close()
+            out_log = job_status_god['status']['exitcode']
+            log_file = open(job_state.exit_code_file,"w")
+            log_file.write(out_log)
+            log_file.close()
+            f.close()
+            print("\nPRINT OUTPUT FILE: ")
+            print(job_state.output_file)
+            print("\nPRINT ERROR FILE: ")
+            print(job_state.error_file)
         return
         
 
