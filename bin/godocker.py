@@ -135,7 +135,9 @@ class GodockerJobRunner(AsynchronousJobRunner):
            No Return data expected 
         '''  
         log.debug(job)
-        self.delete_task(job)
+        log.debug("STOP JOB EXECUTING")
+        #self.get_structure(job)
+        self.delete_task(job.id)
         return None
     
     def recover(self,job):
