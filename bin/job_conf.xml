@@ -14,18 +14,18 @@
     <handlers>
         <handler id="main"/>
     </handlers>
-    <destinations default="local">
+    <destinations default="god">
         <destination id="local" runner="local"/>
 
         <destination id="god" runner="godocker">
             <!-- defaults to use whatever is specified in tool  -->
             <param id="docker_repo_override">my-docker-registry.org</param>
             <param id="docker_owner_override">superbioinfo</param>
-            <param id="docker_image_override">centos:latest</param>
+            <param id="docker_image_override">busybox:ubuntu-14.04</param>
             <param id="docker_tag_override">latest</param>
             <param id="docker_cpu">1</param>
             <param id="docker_memory">2</param>
-            <param id="docker_default_container_id">busybox:ubuntu-14.04</param>
+            <param id="docker_default_container_id">centos:latest</param>
             </destination>
     </destinations>
             <tools>

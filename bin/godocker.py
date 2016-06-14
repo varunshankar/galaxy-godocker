@@ -58,7 +58,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
     def queue_job(self, job_wrapper):
 
     	#job_name = self.get_unique_job_name(job_wrapper)
-        if not self.prepare_job(job_wrapper, include_metadata=False, include_work_dir_outputs=False):
+        if not self.prepare_job(job_wrapper, include_metadata=False, include_work_dir_outputs=True):
             return
 
         job_destination = job_wrapper.job_destination
@@ -68,6 +68,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         job_id = self.post_task(job_wrapper)
         log.debug("Job response from GoDocker")
         log.debug(job_id)
+        log.debug(job_wrapper.working_directory)
         if not job_id:
             log.debug("Job creation faliure!! No Response from GoDocker")
         else:
@@ -82,16 +83,18 @@ class GodockerJobRunner(AsynchronousJobRunner):
         ''' This function is called by check_watched_items()  where param job_state is an object of AsynchronousJobState
             Expected return type of this function is None or AsynchronousJobState object with updated running status
         '''
-        job_status_god = self.get_task_status(job_state.job_id)
+        job_status_god = self.get_task(job_state.job_id)
         
         print("\n JOB STATUS FROM GODOCKER \n")
-        #log.debug(job_status_god)
+        log.debug(job_status_god)
+        self.get_structure(job_status_god)
         #self.get_structure(job_state)
         print("\nEND OF JOB STATUS\n")
         
-        if job_status_god['status']['primary'] == "over":
-            #job_state.running = False
+        if job_status_god['status']['primary'] == "over" and job_status_god['status']['exitcode'] == 0 :
+            job_state.running = False
             job_state.job_wrapper.change_state(model.Job.states.OK)
+            self.create_log_file(job_state,job_status_god)
             self.mark_as_finished(job_state)
             ''' This function executes: self.work_queue.put( ( self.finish_job, job_state ) )
                 self.finish_job -> 
@@ -118,6 +121,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         
         else:
             job_state.running = False
+            self.create_log_file(job_state,job_status_god)
             self.mark_as_failed(job_state)
             return None
         
@@ -141,6 +145,30 @@ class GodockerJobRunner(AsynchronousJobRunner):
     #Helper functions
     def get_unique_job_name(self, job_wrapper):
         return "god-" + job_wrapper.get_id_tag()
+
+    def create_log_file(self, job_state, job_status_god):
+        log = ""
+        src = str(job_status_god['container']['volumes'][1]['path'])
+        god_output_file = src+"/god.log"
+        god_error_file = src+"/god.err"
+        f = open(god_output_file,"r")
+        out_log = f.read()
+        log_file = open(job_state.output_file,"w")
+        log_file.write(out_log)
+        log_file.close()
+        f.close()
+        f = open(god_error_file,"r")
+        out_log = f.read()
+        log_file = open(job_state.error_file,"w")
+        log_file.write(out_log)
+        log_file.close()
+        f.close()
+        print("\nPRINT OUTPUT FILE: ")
+        print(job_state.output_file)
+        print("\nPRINT ERROR FILE: ")
+        print(job_state.error_file)
+        return
+        
 
     #GoDocker API helper functions
 
@@ -254,7 +282,9 @@ class GodockerJobRunner(AsynchronousJobRunner):
     def get_task(self,job_id):
         #Get job details
         job = False
-        if Auth.authenticate():
+        t = {"server":Auth.server,"noCert":Auth.noCert,"token":Auth.token,"login":Auth.login,"apikey":Auth.apikey}
+        log.debug(t)
+        if Auth.token:
             result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id),Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
             job = result.json()
         return job
@@ -270,9 +300,14 @@ class GodockerJobRunner(AsynchronousJobRunner):
     def get_task_status(self,job_id):
         #Get job status
         job = False
-        if Auth.authenticate():
+        t = {"server":Auth.server,"noCert":Auth.noCert,"token":Auth.token,"login":Auth.login,"apikey":Auth.apikey}
+        log.debug(t)
+        if Auth.token:
+            log.debug("Authentication in process!!!")
             result = HttpUtils.http_get_request("/api/1.0/task/"+str(job_id)+"/status",Auth.server,{'Authorization':'Bearer '+Auth.token},Auth.noCert)
             job = result.json()
+        t = {"server":Auth.server,"noCert":Auth.noCert,"token":Auth.token,"login":Auth.login,"apikey":Auth.apikey}
+        log.debug(t)
         return job
 
     def delete_task(self,job_id):
