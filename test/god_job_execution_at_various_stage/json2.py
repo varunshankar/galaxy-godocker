@@ -2,7 +2,7 @@ t = {u'status': {u'date_over': None, u'reason': None, u'exitcode': None, u'prima
 
 print t.keys()
 path = None
-print t['status']['primary']
+print t['status']['exitcode']
 for vol in t['container']['volumes']:
     if vol['name']=="go-docker":
         path = vol['path']

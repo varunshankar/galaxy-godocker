@@ -117,6 +117,13 @@ class GodockerJobRunner(AsynchronousJobRunner):
         elif job_status_god['status']['primary'] == "pending":
             #job_state.job_wrapper.change_state(model.Job.states.WAITING or QUEUED)
             return job_state
+       
+        elif job_status_god['status']['exitcode'] not in [None,0]:
+            job_state.running = False
+            job_state.job_wrapper.change_state(model.Job.states.ERROR)
+            self.create_log_file(job_state,job_status_god)
+            self.mark_as_failed(job_state)
+            return None
         
         else:
             job_state.running = False
@@ -136,12 +143,33 @@ class GodockerJobRunner(AsynchronousJobRunner):
         '''  
         log.debug(job)
         log.debug("STOP JOB EXECUTING")
+        log.debug(job.id)
+        log.debug(job.job_runner_external_id)
         #self.get_structure(job)
-        self.delete_task(job.id)
+        job_status_god = self.get_task_status(job.id)
+        if job_status_god['status']['primary'] != "over":
+            self.delete_task(job.id)
         return None
     
-    def recover(self,job):
-    	pass
+    def recover(self,job ,job_wrapper):
+    	job_id = job.get_job_runner_external_id()
+        ajs = AsynchronousJobState(files_dir=job_wrapper.working_directory, job_wrapper=job_wrapper)
+        ajs.job_id = str( job_id )
+        #god_job_state.runner_url = job_wrapper.get_job_runner_url()
+        ajs.job_destination = job_wrapper.job_destination
+        job_wrapper.command_line = job.command_line
+        ajs.job_wrapper = job_wrapper
+        if job.state == model.Job.states.RUNNING:
+            log.debug( "(%s/%s) is still in running state, adding to the god queue" % ( job.id, job.get_job_runner_external_id() ) )
+            ajs.old_state = 'R'
+            ajs.running = True
+            self.monitor_queue.put(ajs)
+
+        elif job.state == model.Job.states.QUEUED:
+            log.debug( "(%s/%s) is still in god queued state, adding to the god queue" % ( job.id, job.get_job_runner_external_id() ) )
+            ajs.old_state = 'Q'
+            ajs.running = False
+            self.monitor_queue.put(ajs)
 	
     #Helper functions
     def get_unique_job_name(self, job_wrapper):
@@ -225,11 +253,10 @@ class GodockerJobRunner(AsynchronousJobRunner):
         name = job_wrapper.tool.name
         description= "example job"
         array = None
-        project = "galaxy"
+        project = job_wrapper.runner_params["galaxy_master"]
         
         dt = datetime.now()
-        god_job_cmd = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
-        command = god_job_cmd
+        command = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
         log.debug("\n Command: ")
         log.debug(command)
 

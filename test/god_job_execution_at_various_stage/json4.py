@@ -8,6 +8,9 @@ for vol in t['container']['volumes']:
         path = vol['path']
 if path:
     print t['container']['volumes'][1]
+
+if t['status']['exitcode'] in [None,0]:
+    print "yes"
 ##primary -> running
 ##exitcode -> None
 ##secondary -> None
