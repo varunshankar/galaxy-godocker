@@ -30,7 +30,8 @@ class GodockerJobRunner(AsynchronousJobRunner):
     	runner_param_specs = dict(
     		godocker_master = dict(map = str),
     		user = dict(map = str),
-    		key = dict(map = str)
+    		key = dict(map = str),
+            galaxy_master = dict(map = str)
         )
         if 'runner_param_specs' not in kwargs:
         	kwargs['runner_param_specs'] = dict()
