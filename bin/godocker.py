@@ -64,7 +64,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
         job_destination = job_wrapper.job_destination
         log.debug("JOB_WRAPPER")
-        #log.warn(job_wrapper)
+        self.get_structure(job_wrapper)
         log.debug("END OF JOB_WRAPPER \n")
         job_id = self.post_task(job_wrapper)
         log.debug("Job response from GoDocker")
@@ -84,8 +84,10 @@ class GodockerJobRunner(AsynchronousJobRunner):
         ''' This function is called by check_watched_items()  where param job_state is an object of AsynchronousJobState
             Expected return type of this function is None or AsynchronousJobState object with updated running status
         '''
+        log.debug("JOB ID: ")
+        log.debug(job_state.job_id)
         job_status_god = self.get_task(job_state.job_id)
-        
+        self.get_structure(job_state.job_wrapper)
         print("\n JOB STATUS FROM GODOCKER \n")
         log.debug(job_status_god)
         #self.get_structure(job_status_god)
@@ -146,14 +148,17 @@ class GodockerJobRunner(AsynchronousJobRunner):
         log.debug("STOP JOB EXECUTING")
         log.debug(job.id)
         log.debug(job.job_runner_external_id)
-        #self.get_structure(job)
+        self.get_structure(job)
         job_status_god = self.get_task_status(job.id)
         if job_status_god['status']['primary'] != "over":
             self.delete_task(job.id)
         return None
     
     def recover(self,job ,job_wrapper):
-    	job_id = job.get_job_runner_external_id()
+        log.debug("\nINSIDE RECOVER METHOD: JOB STRUCTURE\n")
+        self.get_structure(job)
+        log.debug("\nEND OF JOB STRCUTURE\n")
+    	job_id = job_wrapper.job_id
         ajs = AsynchronousJobState(files_dir=job_wrapper.working_directory, job_wrapper=job_wrapper)
         ajs.job_id = str( job_id )
         #god_job_state.runner_url = job_wrapper.get_job_runner_url()
@@ -197,7 +202,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
             log_file.write(out_log)
             log_file.close()
             f.close()
-            out_log = job_status_god['status']['exitcode']
+            out_log = str(job_status_god['status']['exitcode'])
             log_file = open(job_state.exit_code_file,"w")
             log_file.write(out_log)
             log_file.close()
@@ -254,8 +259,8 @@ class GodockerJobRunner(AsynchronousJobRunner):
         name = job_wrapper.tool.name
         description= "example job"
         array = None
-        project = job_wrapper.runner_params["galaxy_master"]
-        
+        log.debug(self.runner_params["galaxy_master"])
+        project = "galaxy" #str(self.runner_params["galaxy_master"])
         dt = datetime.now()
         command = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
         log.debug("\n Command: ")

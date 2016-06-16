@@ -6,6 +6,7 @@ Testing tool
 
 import string
 import sys
+import time
 
 if __name__ == "__main__":
     name = None
@@ -13,8 +14,9 @@ if __name__ == "__main__":
     try:
         name = sys.argv[1]
         age = str(sys.argv[2])
+        time.sleep(180)
         if int(age) >40:
-           sys.stderr.write('sorry, too old!)
+           sys.stderr.write('sorry, too old!')
            sys.exit(10)
         msg = name + age
         sys.stdout.write(msg)
