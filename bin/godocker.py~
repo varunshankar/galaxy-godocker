@@ -200,11 +200,11 @@ class GodockerJobRunner(AsynchronousJobRunner):
         log.debug("JOB ID: ")
         log.debug(job_state.job_id)
         job_status_god = self.get_task(job_state.job_id)
-        #self.get_structure(job_state.job_wrapper)
+        self.get_structure(job_state.job_wrapper)
         print("\n JOB STATUS FROM GODOCKER \n")
-        #log.debug(job_status_god)
+        log.debug(job_status_god)
         #self.get_structure(job_status_god)
-        #print("\nEND OF JOB STATUS\n")
+        print("\nEND OF JOB STATUS\n")
         
         if job_status_god['status']['primary'] == "over":
             job_state.running = False
