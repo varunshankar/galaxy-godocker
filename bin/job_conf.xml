@@ -8,7 +8,7 @@
             <param id="godocker_master">http://cloud-30.genouest.org</param>
             <param id="user">gosc</param>
             <param id="key">DKZPM1NDE3</param>
-            <param id="galaxy_master">GodockerIntegration</param>
+            <param id="godocker_project">galaxy</param>
             <!-- <param id="image">centos:latest</param><param id="cpu">1</param><param id="mem">1</param -->
         </plugin>
     </plugins>
