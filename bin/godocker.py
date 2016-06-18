@@ -172,13 +172,14 @@ class GodockerJobRunner(AsynchronousJobRunner):
     def queue_job(self, job_wrapper):
 
     	#job_name = self.get_unique_job_name(job_wrapper)
-        if not self.prepare_job(job_wrapper, include_metadata=False, include_work_dir_outputs=True):
+        if not self.prepare_job(job_wrapper, include_metadata=False, include_work_dir_outputs=True, modify_command_for_container=False):
             return
 
         job_destination = job_wrapper.job_destination
         log.debug("JOB_WRAPPER")
         self.get_structure(job_wrapper)
         log.debug("END OF JOB_WRAPPER \n")
+        log.debug(job_wrapper.output_paths)
         job_id = self.post_task(job_wrapper)
         log.debug("Job response from GoDocker")
         log.debug(job_id)

@@ -1,0 +1,12 @@
+1. Statistics:
+
+Summary Statistics:
+Traceback (most recent call last): File "/omaha-beach/galaxy/code/galaxy/tools/stats/gsummary.py", line 10, in <module> from rpy import BASIC_CONVERSION, NO_CONVERSION, r, RException, set_default_mode ImportError: No module named rpy
+
+2. Graph/Display Data:
+
+Bar Chart Tool:
+Traceback (most recent call last):
+File "/omaha-beach/galaxy/code/galaxy/tools/plotting/bar_chart.py", line 26, in <module>
+import Gnuplot, Gnuplot.funcutils
+ImportError: No module named Gnuplot

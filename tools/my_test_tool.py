@@ -18,8 +18,8 @@ if __name__ == "__main__":
         if int(age) >40:
            sys.stderr.write('sorry, too old!')
            sys.exit(10)
-        msg = name + age
         sys.stdout.write(msg)
     except:
+        msg = "sorry, too old!"
         sys.stderr.write(msg)
         sys.exit(100)
