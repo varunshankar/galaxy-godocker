@@ -186,6 +186,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         log.debug(job_wrapper.working_directory)
         if not job_id:
             log.debug("Job creation faliure!! No Response from GoDocker")
+            job_wrapper.fail("Not submitted")
         else:
             log.debug("Starting queue_job for job " + job_id)
             ajs = AsynchronousJobState(files_dir = job_wrapper.working_directory,job_wrapper = job_wrapper,job_id = job_id,job_destination = job_destination)
@@ -371,7 +372,10 @@ class GodockerJobRunner(AsynchronousJobRunner):
                 docker_ram = 1
             try:
                 docker_image = self._find_container(job_wrapper).container_id
+                #log.debug(self._find_container(job_wrapper))
+                #self.get_structure(self._find_container(job_wrapper))
                 log.debug(docker_image)
+                raw_input("")
             except:
                 log.debug("Error: Docker_image not specified in Job config and Tool config!!")
                 return False
