@@ -160,7 +160,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
         log.debug(self.runner_params)
         
         if not self.auth:
-            log.debug("Authentication failure!! Runner cannot be started")
+            log.debug("Authentication failure!! Job cannot be started")
         else:
             """ Following methods starts threads.
                 threading.Thread(name,target) invokes methods monitor() and run_next()
@@ -360,15 +360,15 @@ class GodockerJobRunner(AsynchronousJobRunner):
             job_destination = job_wrapper.job_destination
             #docker_repo = job_destination.params["docker_repo_override"]
             #docker_owner = job_destination.params["docker_owner_override"]
+            '''
+            try:
+                docker_image = job_destination.params["docker_default_container_id"]
+            except KeyError:
+                log.debug("Image not specified in Job config!!")
+            '''
             #docker_tags = job_destination.params["docker_tag_override"]
-            try:
-                docker_cpu = int(job_destination.params["docker_cpu"])
-            except KeyError,ValueError:
-                docker_cpu = 1
-            try:
-                docker_ram = int(job_destination.params["docker_memory"])
-            except KeyError,ValueError:
-                docker_ram = 1
+            docker_cpu = job_destination.params["docker_cpu"]
+            docker_ram = job_destination.params["docker_memory"]
             try:
                 docker_image = self._find_container(job_wrapper).container_id
                 log.debug(docker_image)
@@ -409,8 +409,8 @@ class GodockerJobRunner(AsynchronousJobRunner):
             'tags': tags_tab
         },
         'requirements': {
-            'cpu': docker_cpu, #cpu,
-            'ram': docker_ram, #ram,
+            'cpu': int(docker_cpu), #cpu,
+            'ram': int(docker_ram), #ram,
             'array': { 'values': array},
             'label': labels,
 	    'tasks': tasks_depends,
