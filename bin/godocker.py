@@ -37,16 +37,16 @@ class Godocker(object):
         try:
             url= self.server+query
             res = requests.post(url, data, headers=header, verify=verify_ssl)
-            print('Godocker Response:',res, "\n")
+            log.debug('Godocker Response:',res, "\n")
 
         except requests.exceptions.ConnectionError as e:
             print('A Connection error occurred:', e)
             if re.search("SSL3_GET_SERVER_CERTIFICATE", str(e)):
-                print("Use the --no-certificate option if you trust the remote godocker server certificate.")
+                log.debug("Use the --no-certificate option if you trust the remote godocker server certificate.")
             return False
 
         except requests.exceptions.HTTPError as e:
-            print('A HTTP error occurred:', e)
+            log.debug('A HTTP error occurred:', e)
             return False
 
         return self.test_status_code(res)
@@ -63,11 +63,11 @@ class Godocker(object):
             res = requests.get(url, headers=header, verify=verify_ssl)
 
         except requests.exceptions.ConnectionError as e:
-            print('A Connection error occurred:', e)
+            log.debug('A Connection error occurred:', e)
             return False
 
         except requests.exceptions.HTTPError as e:
-            print('A HTTP error occurred:', e)
+            log.debug('A HTTP error occurred:', e)
             return False
 
         return self.test_status_code(res)
@@ -83,11 +83,11 @@ class Godocker(object):
             res = requests.delete(url, headers=header, verify=verify_ssl)
 
         except requests.exceptions.ConnectionError as e:
-            print('A Connection error occurred:', e)
+            log.debug('A Connection error occurred:', e)
             return False
 
         except requests.exceptions.HTTPError as e:
-            print('A HTTP error occurred:', e)
+            log.debug('A HTTP error occurred:', e)
             return False
 
         return self.test_status_code(res)
@@ -103,11 +103,11 @@ class Godocker(object):
             res = requests.put(url, data, headers=header, verify=verify_ssl)
 
         except requests.exceptions.ConnectionError as e:
-            print('A Connection error occurred:', e)
+            log.debug('A Connection error occurred:', e)
             return False
 
         except requests.exceptions.HTTPError as e:
-            print('A HTTP error occurred:', e)
+            log.debug('A HTTP error occurred:', e)
             return False
 
         return self.test_status_code(res)
@@ -116,13 +116,13 @@ class Godocker(object):
     def test_status_code(self,httpresult):
         """ exit if status code is 401 or 403 or 404 or 200"""
         if httpresult.status_code == 401:
-            print('Unauthorized : this server could not verify that you are authorized to access the document you requested.')
+            log.debug('Unauthorized : this server could not verify that you are authorized to access the document you requested.')
 
         elif httpresult.status_code == 403:
-            print('Forbidden : Access was denied to this resource. Not authorized to access this resource.')
+            log.debug('Forbidden : Access was denied to this resource. Not authorized to access this resource.')
 
         elif httpresult.status_code == 404:
-            print('Not Found : The resource could not be found.')
+            log.debug('Not Found : The resource could not be found.')
 
         elif httpresult.status_code == 200:
             return httpresult
@@ -360,28 +360,37 @@ class GodockerJobRunner(AsynchronousJobRunner):
             job_destination = job_wrapper.job_destination
             #docker_repo = job_destination.params["docker_repo_override"]
             #docker_owner = job_destination.params["docker_owner_override"]
-            #docker_image = job_destination.params["docker_default_container_id"]
+            '''
+            try:
+                docker_image = job_destination.params["docker_default_container_id"]
+            except KeyError:
+                log.debug("Image not specified in Job config!!")
+            '''
             #docker_tags = job_destination.params["docker_tag_override"]
             docker_cpu = job_destination.params["docker_cpu"]
             docker_ram = job_destination.params["docker_memory"]
-            docker_image = self._find_container(job_wrapper).container_id
+            try:
+                docker_image = self._find_container(job_wrapper).container_id
+                log.debug(docker_image)
+            except:
+                log.debug("Error: Docker_image not specified in Job config and Tool config!!")
+                return False
 
-        
-            #volume = "home"
-            #docker_image="centos:latest"
+            
             volumes=[]
             labels=[]
-            #tags
-            #tags_tab = docker_tags.split(",")
             tags_tab = ['galaxy',job_wrapper.tool.id]
 
             # manage depends
             tasks_depends = []
             name = job_wrapper.tool.name
-            description= "example job"
+            description= "galaxy job"
             array = None
-            log.debug(self.runner_params["godocker_project"])
-            project = str(self.runner_params["godocker_project"])
+            try:
+                log.debug(self.runner_params["godocker_project"])
+                project = str(self.runner_params["godocker_project"])
+            except KeyError:
+                project = ""
             dt = datetime.now()
             command = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
             log.debug("\n Command: ")
