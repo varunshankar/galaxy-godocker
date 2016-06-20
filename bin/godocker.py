@@ -353,12 +353,13 @@ class GodockerJobRunner(AsynchronousJobRunner):
         if self.auth.token:
             log.debug("\n INSIDE JOB CREATION TEMPLATE \n")
             job_destination = job_wrapper.job_destination
-            docker_repo = job_destination.params["docker_repo_override"]
-            docker_owner = job_destination.params["docker_owner_override"]
-            docker_image = job_destination.params["docker_default_container_id"]
-            docker_tags = job_destination.params["docker_tag_override"]
-            docker_cpu = job_destination.params["docker_cpu"]
-            docker_ram = job_destination.params["docker_memory"]
+            #docker_repo = job_destination.params["docker_repo_override"]
+            #docker_owner = job_destination.params["docker_owner_override"]
+            #docker_image = job_destination.params["docker_default_container_id"]
+            #docker_tags = job_destination.params["docker_tag_override"]
+            #docker_cpu = job_destination.params["docker_cpu"]
+            #docker_ram = job_destination.params["docker_memory"]
+            docker_image = self._find_container(job_wrapper).container_id
 
         
             #volume = "home"

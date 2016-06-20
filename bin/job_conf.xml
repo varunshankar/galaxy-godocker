@@ -19,10 +19,13 @@
         <destination id="local" runner="local"/>
         <destination id="god" runner="godocker">
             <!-- defaults to use whatever is specified in tool  -->
+            <!--
             <param id="docker_repo_override">my-docker-registry.org</param>
             <param id="docker_owner_override">superbioinfo</param>
-            <param id="docker_image_override">busybox:ubuntu-14.04</param>
+            <param id="docker_image_override">centos<param>
             <param id="docker_tag_override">latest</param>
+            -->
+            <param id="docker_enabled">true</param>
             <param id="docker_cpu">1</param>
             <param id="docker_memory">2</param>
             <param id="docker_default_container_id">centos:latest</param>
