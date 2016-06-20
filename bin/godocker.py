@@ -210,8 +210,10 @@ class GodockerJobRunner(AsynchronousJobRunner):
         if job_status_god['status']['primary'] == "over":
             job_state.running = False
             job_state.job_wrapper.change_state(model.Job.states.OK)
-            self.create_log_file(job_state,job_status_god)
-            self.mark_as_finished(job_state)
+            if self.create_log_file(job_state,job_status_god):
+                self.mark_as_finished(job_state)
+            else:
+                self.mark_as_failed(job_state)
             ''' This function executes: self.work_queue.put( ( self.finish_job, job_state ) )
                 self.finish_job -> 
                                 job_state.job_wrapper.finish( stdout, stderr, exit_code )
@@ -296,7 +298,6 @@ class GodockerJobRunner(AsynchronousJobRunner):
         return "god-" + job_wrapper.get_id_tag()
 
     def create_log_file(self, job_state, job_status_god):
-        log = ""
         path = None
         for vol in job_status_god['container']['volumes']:
             if vol['name']=="go-docker":
@@ -304,28 +305,32 @@ class GodockerJobRunner(AsynchronousJobRunner):
         if path:
             god_output_file = path+"/god.log"
             god_error_file = path+"/god.err"
-            f = open(god_output_file,"r")
-            out_log = f.read()
-            log_file = open(job_state.output_file,"w")
-            log_file.write(out_log)
-            log_file.close()
-            f.close()
-            f = open(god_error_file,"r")
-            out_log = f.read()
-            log_file = open(job_state.error_file,"w")
-            log_file.write(out_log)
-            log_file.close()
-            f.close()
-            out_log = str(job_status_god['status']['exitcode'])
-            log_file = open(job_state.exit_code_file,"w")
-            log_file.write(out_log)
-            log_file.close()
-            f.close()
-            print("\nPRINT OUTPUT FILE: ")
-            print(job_state.output_file)
-            print("\nPRINT ERROR FILE: ")
-            print(job_state.error_file)
-        return
+            try:
+                f = open(god_output_file,"r")
+                out_log = f.read()
+                log_file = open(job_state.output_file,"w")
+                log_file.write(out_log)
+                log_file.close()
+                f.close()
+                f = open(god_error_file,"r")
+                out_log = f.read()
+                log_file = open(job_state.error_file,"w")
+                log_file.write(out_log)
+                log_file.close()
+                f.close()
+                out_log = str(job_status_god['status']['exitcode'])
+                log_file = open(job_state.exit_code_file,"w")
+                log_file.write(out_log)
+                log_file.close()
+                f.close()
+                print("\nPRINT OUTPUT FILE: ")
+                print(job_state.output_file)
+                print("\nPRINT ERROR FILE: ")
+                print(job_state.error_file)
+            except IOError:
+                log.debug("IO Error occurred when accessing the files!!")
+                return False
+        return True
         
 
     #GoDocker API helper functions
@@ -357,8 +362,8 @@ class GodockerJobRunner(AsynchronousJobRunner):
             #docker_owner = job_destination.params["docker_owner_override"]
             #docker_image = job_destination.params["docker_default_container_id"]
             #docker_tags = job_destination.params["docker_tag_override"]
-            #docker_cpu = job_destination.params["docker_cpu"]
-            #docker_ram = job_destination.params["docker_memory"]
+            docker_cpu = job_destination.params["docker_cpu"]
+            docker_ram = job_destination.params["docker_memory"]
             docker_image = self._find_container(job_wrapper).container_id
 
         
