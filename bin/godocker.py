@@ -390,22 +390,23 @@ class GodockerJobRunner(AsynchronousJobRunner):
             name = job_wrapper.tool.name
             description= "galaxy job"
             array = None
+            project = None
             try:
                 log.debug(self.runner_params["godocker_project"])
                 project = str(self.runner_params["godocker_project"])
             except KeyError:
-                project = ""
+                log.warn("godocker_project not defined, using defaults")
             dt = datetime.now()
             command = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
             log.debug("\n Command: ")
             log.debug(command)
-            job = {
+            job = {"""
         'user' : {
             #'id' : user_infos['id'],
             #'uid' : user_infos['uid'],
             #'gid' : user_infos['gid'],
             'project' : project
-        },
+        },"""
         'date': time.mktime(dt.timetuple()),
         'meta': {
             'name': name,
@@ -439,6 +440,8 @@ class GodockerJobRunner(AsynchronousJobRunner):
             'secondary': None
             }
             }
+            if project != None:
+            	job['user'] = {"project": project}
             log.debug("JOB TEMPLATE: ")
             log.debug(job)
             log.debug("END OF JOB TEMPLATE \n")
