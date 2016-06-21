@@ -328,7 +328,8 @@ class GodockerJobRunner(AsynchronousJobRunner):
                 print(job_state.output_file)
                 print("\nPRINT ERROR FILE: ")
                 print(job_state.error_file)
-            except IOError:
+            except IOError as e:
+            	log.error('Could not access task log file %s' % str(e))
                 log.debug("IO Error occurred when accessing the files!!")
                 return False
         return True
