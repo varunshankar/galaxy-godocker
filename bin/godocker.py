@@ -376,7 +376,6 @@ class GodockerJobRunner(AsynchronousJobRunner):
                 #log.debug(self._find_container(job_wrapper))
                 #self.get_structure(self._find_container(job_wrapper))
                 log.debug(docker_image)
-                raw_input("")
             except:
                 log.debug("Error: Docker_image not specified in Job config and Tool config!!")
                 return False
