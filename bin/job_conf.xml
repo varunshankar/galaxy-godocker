@@ -29,7 +29,7 @@
             <param id="docker_cpu">1</param>
             <param id="docker_memory">2</param>
             <param id="docker_default_container_id">centos:latest</param>
-            <param id="godocker_volumes">home,db</param>
+            <param id="godocker_volumes"></param>
         </destination>
     </destinations>
     <tools>

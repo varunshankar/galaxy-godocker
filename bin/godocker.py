@@ -407,7 +407,13 @@ class GodockerJobRunner(AsynchronousJobRunner):
                 log.warn("godocker_volumes not set.Getting default volume!!")
 
             dt = datetime.now()
-            command = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
+            GALAXY_VENV_TEMPLATE = """GALAXY_VIRTUAL_ENV="%s"; if [ "$GALAXY_VIRTUAL_ENV" != "None" -a -z "$VIRTUAL_ENV" -a -f "$GALAXY_VIRTUAL_ENV/bin/activate" ]; then . "$GALAXY_VIRTUAL_ENV/bin/activate"; fi;"""
+            venv = GALAXY_VENV_TEMPLATE % job_wrapper.galaxy_virtual_env
+            log.debug("galaxy_virtual_env: ")
+            log.debug(job_wrapper.galaxy_virtual_env)
+            log.debug("VENV: ")
+            log.debug(venv)
+            command = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+venv+"\n"+job_wrapper.runner_command_line
             log.debug("\n Command: ")
             log.debug(command)
             job = {"""
