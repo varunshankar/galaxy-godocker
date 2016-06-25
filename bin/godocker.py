@@ -37,7 +37,7 @@ class Godocker(object):
         try:
             url= self.server+query
             res = requests.post(url, data, headers=header, verify=verify_ssl)
-            log.debug('Godocker Response:',res, "\n")
+            #log.debug('Godocker Response:',res, "\n")
 
         except requests.exceptions.ConnectionError as e:
             print('A Connection error occurred:', e)
@@ -396,6 +396,16 @@ class GodockerJobRunner(AsynchronousJobRunner):
                 project = str(self.runner_params["godocker_project"])
             except KeyError:
                 log.warn("godocker_project not defined, using defaults")
+            try:
+                log.debug(job_destination.params["godocker_volumes"])
+                volume = job_destination.params["godocker_volumes"]
+                volume = volume.split(",")
+                for i in volume:
+                   temp = dict({"name":i})
+                   volumes.append(temp)
+            except:
+                log.warn("godocker_volumes not set.Getting default volume!!")
+
             dt = datetime.now()
             command = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
             log.debug("\n Command: ")
