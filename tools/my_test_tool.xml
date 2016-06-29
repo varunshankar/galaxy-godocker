@@ -11,7 +11,7 @@
     <data name="output1" format="tabular"/>
   </outputs>
   <requirements>
-        <container type="docker">debian:latest</container>
+        <container type="docker">python:2.7-wheezy</container>
   </requirements>
   <help>
 Checking program status

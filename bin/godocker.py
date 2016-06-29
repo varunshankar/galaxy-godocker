@@ -375,6 +375,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
                 docker_image = self._find_container(job_wrapper).container_id
                 #log.debug(self._find_container(job_wrapper))
                 #self.get_structure(self._find_container(job_wrapper))
+                log.debug("DOCKER IMAGE: \n")
                 log.debug(docker_image)
             except:
                 log.debug("Error: Docker_image not specified in Job config and Tool config!!")
@@ -407,13 +408,21 @@ class GodockerJobRunner(AsynchronousJobRunner):
                 log.warn("godocker_volumes not set.Getting default volume!!")
 
             dt = datetime.now()
-            GALAXY_VENV_TEMPLATE = """GALAXY_VIRTUAL_ENV="%s"; if [ "$GALAXY_VIRTUAL_ENV" != "None" -a -z "$VIRTUAL_ENV" -a -f "$GALAXY_VIRTUAL_ENV/bin/activate" ]; then . "$GALAXY_VIRTUAL_ENV/bin/activate"; fi;"""
-            venv = GALAXY_VENV_TEMPLATE % job_wrapper.galaxy_virtual_env
-            log.debug("galaxy_virtual_env: ")
-            log.debug(job_wrapper.galaxy_virtual_env)
-            log.debug("VENV: ")
-            log.debug(venv)
-            command = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+venv+"\n"+job_wrapper.runner_command_line
+            try:
+                if(job_destination.params["virtualenv"] == "true"):
+                    log.debug("Virtual environment is set")
+                    GALAXY_VENV_TEMPLATE = """GALAXY_VIRTUAL_ENV="%s"; if [ "$GALAXY_VIRTUAL_ENV" != "None" -a -z "$VIRTUAL_ENV" -a -f "$GALAXY_VIRTUAL_ENV/bin/activate" ]; then . "$GALAXY_VIRTUAL_ENV/bin/activate"; fi;"""
+                    venv = GALAXY_VENV_TEMPLATE % job_wrapper.galaxy_virtual_env
+                    log.debug("galaxy_virtual_env: ")
+                    log.debug(job_wrapper.galaxy_virtual_env)
+                    log.debug("VENV: ")
+                    log.debug(venv)
+                    command = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+venv+"\n"+job_wrapper.runner_command_line
+                else:
+                    command = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
+            except:
+                command = "#!/bin/bash\n"+"cd "+job_wrapper.working_directory+"\n"+job_wrapper.runner_command_line
+            
             log.debug("\n Command: ")
             log.debug(command)
             job = {"""
