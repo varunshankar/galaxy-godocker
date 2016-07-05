@@ -196,10 +196,9 @@ class GodockerJobRunner(AsynchronousJobRunner):
         ''' This function is called by check_watched_items()  where param job_state is an object of AsynchronousJobState
             Expected return type of this function is None or AsynchronousJobState object with updated running status
         '''
-        log.debug("JOB ID: ",job_state.job_id)
         """ Get task from GoDocker """
         job_status_god = self.get_task(job_state.job_id)
-        log.debug("Job ID: ",job_state.job_id," Job Status: ",job_state.job_id)
+        log.debug("Job ID: "+str(job_state.job_id)+" Job Status: "+str(job_status_god['status']['primary']))
         
         if job_status_god['status']['primary'] == "over":
             job_state.running = False
@@ -250,7 +249,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
            where param job = self.sa_session.query( self.app.model.Job ).get( job_state.job_wrapper.job_id )
            No Return data expected 
         '''
-        log.debug("STOP JOB EXECUTION OF JOB ID: ",job.id)
+        log.debug("STOP JOB EXECUTION OF JOB ID: "+ str(job.id))
         # Get task status from GoDocker.
         job_status_god = self.get_task_status(job.id)
         if job_status_god['status']['primary'] != "over":
@@ -315,9 +314,9 @@ class GodockerJobRunner(AsynchronousJobRunner):
                 log_file.write(out_log)
                 log_file.close()
                 f.close()
-                log.debug("CREATE OUTPUT FILE: ",job_state.output_file)
-                log.debug("CREATE ERROR FILE: ",job_state.error_file)
-                log.debug("CREATE EXIT CODE FILE: ",job_state.exit_code_file)
+                log.debug("CREATE OUTPUT FILE: "+str(job_state.output_file))
+                log.debug("CREATE ERROR FILE: "+str(job_state.error_file))
+                log.debug("CREATE EXIT CODE FILE: "+str(job_state.exit_code_file))
             except IOError as e:
             	log.error('Could not access task log file %s' % str(e))
                 log.debug("IO Error occurred when accessing the files!!")
