@@ -40,7 +40,7 @@ class Godocker(object):
             #log.debug('Godocker Response:',res, "\n")
 
         except requests.exceptions.ConnectionError as e:
-            print('A Connection error occurred:', e)
+            log.debug('A Connection error occurred:', e)
             if re.search("SSL3_GET_SERVER_CERTIFICATE", str(e)):
                 log.debug("Use the --no-certificate option if you trust the remote godocker server certificate.")
             return False
@@ -151,13 +151,10 @@ class GodockerJobRunner(AsynchronousJobRunner):
         
         kwargs['runner_param_specs'].update(runner_param_specs)
         super(GodockerJobRunner, self).__init__(app, nworkers, **kwargs)
-        
-        log.debug("runner_params before godocker login: \n")
+        log.debug("Runner Params from job_conf")
         log.debug(self.runner_params)
         # godocker API login call to be done here
         self.auth = self.login(self.runner_params["key"],self.runner_params["user"],self.runner_params["godocker_master"])
-        log.debug("runner_params after godocker login: \n")
-        log.debug(self.runner_params)
         
         if not self.auth:
             log.debug("Authentication failure!! Runner cannot be started")
@@ -170,16 +167,15 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
 
     def queue_job(self, job_wrapper):
-
-    	#job_name = self.get_unique_job_name(job_wrapper)
+    	
         if not self.prepare_job(job_wrapper, include_metadata=False, include_work_dir_outputs=True, modify_command_for_container=False):
             return
 
         job_destination = job_wrapper.job_destination
-        log.debug("JOB_WRAPPER")
-        self.get_structure(job_wrapper)
-        log.debug("END OF JOB_WRAPPER \n")
-        log.debug(job_wrapper.output_paths)
+        #log.debug("JOB_WRAPPER")
+        #self.get_structure(job_wrapper)
+        #log.debug("END OF JOB_WRAPPER \n")
+        #log.debug(job_wrapper.output_paths)
         job_id = self.post_task(job_wrapper)
         log.debug("Job response from GoDocker")
         log.debug(job_id)
@@ -235,7 +231,6 @@ class GodockerJobRunner(AsynchronousJobRunner):
             return job_state
         
         elif job_status_god['status']['primary'] == "pending":
-            #job_state.job_wrapper.change_state(model.Job.states.WAITING or QUEUED)
             return job_state
        
         elif job_status_god['status']['exitcode'] not in [None,0]:
@@ -295,8 +290,6 @@ class GodockerJobRunner(AsynchronousJobRunner):
             self.monitor_queue.put(ajs)
 	
     #Helper functions
-    def get_unique_job_name(self, job_wrapper):
-        return "god-" + job_wrapper.get_id_tag()
 
     def create_log_file(self, job_state, job_status_god):
         path = None
@@ -356,13 +349,9 @@ class GodockerJobRunner(AsynchronousJobRunner):
 
     def post_task(self,job_wrapper):
         #Sumbit job to godocker
-        #Auth.authenticate()
         if self.auth.token:
             log.debug("\n INSIDE JOB CREATION TEMPLATE \n")
             job_destination = job_wrapper.job_destination
-            #docker_repo = job_destination.params["docker_repo_override"]
-            #docker_owner = job_destination.params["docker_owner_override"]
-            #docker_tags = job_destination.params["docker_tag_override"]
             try:
                 docker_cpu = int(job_destination.params["docker_cpu"])
             except KeyError,ValueError:
