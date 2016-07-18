@@ -46,7 +46,10 @@ https://wiki.galaxyproject.org/Admin/Tools/ToolDependencies
 
 The latest information about Galaxy is available via https://galaxyproject.org/
 
-# Installation 
+# Architecture
+
+![alt-image](https://github.com/varunshankar/galaxy-godocker/blob/master/Go-Docker.PNG)
+
 
 
 
