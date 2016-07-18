@@ -46,6 +46,12 @@ https://wiki.galaxyproject.org/Admin/Tools/ToolDependencies
 
 The latest information about Galaxy is available via https://galaxyproject.org/
 
+# Documentation
+
+Runner documentation is available [here](https://github.com/varunshankar/galaxy-godocker/wiki/%5BDOCUMENTATION%5D-GoDocker-runner-for-galaxy)
+
+Interested in creating a runner? Tutorial is available [here](https://github.com/varunshankar/galaxy-godocker/wiki/%5BTUTORIAL%5D-Create-a-new-runner-for-Galaxy)
+
 # Architecture
 
 ![alt-image](https://github.com/varunshankar/galaxy-godocker/blob/master/Go-Docker.PNG)
