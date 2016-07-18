@@ -2,7 +2,7 @@
 
 # Galaxy-Godocker
 
-A runner/executor for Galaxy jobs using GoDocker.
+A REST based runner for executing Galaxy jobs using GoDocker.
 
 GoDocker is a batch computing/cluster management tool using Docker as execution/isolation system.
 Galaxy is designed to run jobs on your local system by default, but it can be configured to run jobs on a cluster. The front-end Galaxy application runs on a single server as usual, but tools are run on cluster nodes instead. Here, we use GoDocker system to manage authentication, scheduling and execution of jobs.
@@ -13,22 +13,25 @@ REST API of GoDocker is defined [here](http://www.genouest.org/api/godocker-api/
 
 Galaxy requires Python 2.7 To check your python version, run:
 
-.. code:: console
-
+```
     $ python -V
     Python 2.7.3
+```
+
+Runner should be configured for the requirements and user information of GoDocker and is available at ``job_conf.xml``.
+A template of job_conf.xml is available [here](https://github.com/varunshankar/galaxy-godocker/blob/master/bin/job_conf.xml/)
 
 Start Galaxy:
 
-.. code:: console
-
+```
     $ sh run.sh
-
+```
 Once Galaxy completes startup, you should be able to view Galaxy in your
 browser at:
 
 http://localhost:8080
 
+  
 You may wish to make changes from the default configuration. This can be
 done in the ``config/galaxy.ini`` file. Tools can be either installed
 from the Tool Shed or added manually. For details please see the Galaxy
