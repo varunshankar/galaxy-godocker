@@ -11,40 +11,41 @@ REST API of GoDocker is defined [here](http://www.genouest.org/api/godocker-api/
 
 # Galaxy Quickstart
 
-Galaxy requires Python 2.7 To check your python version, run:
+* Galaxy requires Python 2.7 To check your python version, run:
 
 ```
     $ python -V
     Python 2.7.3
 ```
 
-Runner should be configured for the requirements and user information of GoDocker and is available at ``job_conf.xml``.
+* Runner should be configured for the requirements and user information of GoDocker and is available at ``job_conf.xml``.
 A template of job_conf.xml is available [here](https://github.com/varunshankar/galaxy-godocker/blob/master/bin/job_conf.xml/)
 
-Start Galaxy:
+* Galaxy currently requires a shared filesystem between the Galaxy server and the cluster nodes.
+
+* Start Galaxy:
 
 ```
     $ sh run.sh
 ```
-Once Galaxy completes startup, you should be able to view Galaxy in your
+* Once Galaxy completes startup, you should be able to view Galaxy in your
 browser at:
 
 http://localhost:8080
 
-  
-You may wish to make changes from the default configuration. This can be
+* You may wish to make changes from the default configuration. This can be
 done in the ``config/galaxy.ini`` file. Tools can be either installed
 from the Tool Shed or added manually. For details please see the Galaxy
 wiki:
 
 https://wiki.galaxyproject.org/Admin/Tools/AddToolFromToolShedTutorial
 
-Not all dependencies are included for the tools provided in the sample
+* Not all dependencies are included for the tools provided in the sample
 ``tool_conf.xml``. A full list of external dependencies is available at:
 
 https://wiki.galaxyproject.org/Admin/Tools/ToolDependencies
 
-The latest information about Galaxy is available via https://galaxyproject.org/
+* The latest information about Galaxy is available via https://galaxyproject.org/
 
 # Documentation
 
