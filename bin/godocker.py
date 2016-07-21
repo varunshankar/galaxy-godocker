@@ -331,7 +331,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
     	    Create Login model schema of GoDocker and call the http_post_request method.
     	"""
         log.debug("LOGIN TASK TO BE EXECUTED \n")
-        log.warn("GODOCKER LOGIN: "+str(login))
+        log.debug("GODOCKER LOGIN: "+str(login))
         data=json.dumps({'user': login, 'apikey': apikey})
         #Create object of Godocker class
         g_auth = Godocker(server,login,apikey,noCert)
@@ -380,7 +380,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
                 log.debug(self.runner_params["godocker_project"])
                 project = str(self.runner_params["godocker_project"])
             except KeyError:
-                log.warn("godocker_project not defined, using defaults")
+                log.debug("godocker_project not defined, using defaults")
             try:
                 log.debug(job_destination.params["godocker_volumes"])
                 volume = job_destination.params["godocker_volumes"]
@@ -389,7 +389,7 @@ class GodockerJobRunner(AsynchronousJobRunner):
                    temp = dict({"name":i})
                    volumes.append(temp)
             except:
-                log.warn("godocker_volumes not set. Getting default volume!!")
+                log.debug("godocker_volumes not set. Getting default volume!!")
 
             dt = datetime.now()
             #Enable galaxy venv in the docker containers
