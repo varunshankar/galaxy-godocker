@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 ![alt tag](https://camo.githubusercontent.com/280a5866b9f4bfb939799776e9b651e986c6600c/68747470733a2f2f77696b692e67616c61787970726f6a6563742e6f72672f496d616765732f47616c6178794c6f676f3f616374696f6e3d41747461636846696c6526646f3d676574267461726765743d67616c6178795f70726f6a6563745f6c6f676f2e6a7067)
 
 # Galaxy-Godocker
@@ -57,15 +57,3 @@ Interested in creating a runner? Tutorial is available [here](https://github.com
 # Architecture
 
 ![alt-image](https://github.com/varunshankar/galaxy-godocker/blob/master/Go-Docker.PNG)
-
-
-
-
-
-
-
-
-=======
-# galaxy-godocker
-Using Godocker as runner for Galaxy
->>>>>>> 700aa20eef876465858263e6eac893066ebd42c0
