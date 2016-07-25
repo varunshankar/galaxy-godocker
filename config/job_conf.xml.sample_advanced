@@ -207,11 +207,11 @@
         </plugin>
         <plugin id="godocker" type="runner" load="galaxy.jobs.runners.godocker:GodockerJobRunner">
             <!--  REST based runner , submits jobs to godocker -->
-            <param id="godocker_master">http://cloud-30.genouest.org</param>
+            <param id="godocker_master">GODOCKER_URL</param>
             <!-- Specify the instance of GoDocker -->
-            <param id="user">gosc</param>
+            <param id="user">USERNAME</param>
             <!-- GoDocker username -->
-            <param id="key">DKZPM1NDE3</param>
+            <param id="key">APIKEY</param>
             <!-- GoDocker API key -->
             <param id="godocker_project">galaxy</param>
             <!-- Specify the project present in the GoDocker setup -->

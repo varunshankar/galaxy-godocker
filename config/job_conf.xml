@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!-- A sample job config that explicitly configures job running the way it is configured by default (if there is no explicit config). -->
+<job_conf>
+    <plugins>
+        <plugin id="local" type="runner" load="galaxy.jobs.runners.local:LocalJobRunner" workers="4"/>
+        <plugin id="godocker" type="runner" load="galaxy.jobs.runners.godocker:GodockerJobRunner">
+            <!--  REST based runner , submits jobs to godocker -->
+            <param id="godocker_master">http://cloud-30.genouest.org</param>
+            <!-- Specify the instance of GoDocker -->
+            <param id="user">gosc</param>
+            <!-- GoDocker username -->
+            <param id="key">DKZPM1NDE3</param>
+            <!-- GoDocker API key -->
+            <param id="godocker_project">galaxy</param>
+            <!-- Specify the project present in the GoDocker setup -->
+        </plugin>
+    </plugins>
+    <handlers>
+        <handler id="main"/>
+    </handlers>
+    <destinations default="god">
+        <destination id="local" runner="local"/>
+        <destination id="god" runner="godocker">
+            <!-- The following are configurations for the container -->
+            <param id="docker_enabled">true</param>
+            <param id="docker_cpu">1</param>
+            <param id="docker_memory">2</param>
+            <param id="docker_default_container_id">centos:latest</param>
+            <!-- Specify the image on which the jobs have to be executed -->
+            <param id="godocker_volumes"></param>
+            <!-- Mount the godocker volumes 
+                 volumes must be separated by commas.
+                 eg: <param id="godocker_volumes">home,galaxy</param>
+            -->
+            <param id="virtualenv">false</param>
+            <!-- If a tool execution in container requires galaxy virtualenv, 
+                 then enable it by setting the value to true.
+                 Disable venv by setting the value to false.
+            -->
+        </destination>
+    </destinations>
+    <tools>
+        <tool id="my_test_tool" destination="god" />
+    </tools>
+</job_conf>
