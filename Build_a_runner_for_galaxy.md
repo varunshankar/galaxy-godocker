@@ -1,5 +1,5 @@
-##CREATE RUNNER FOR GALAXY
-###A walk through the steps of creating a runner for Galaxy.
+##BUILD RUNNER FOR GALAXY
+###A walk through the steps of building a runner for Galaxy.
 
 In this tutorial, we would build the runner in a block by block fashion (like the building blocks), so we would divide the runner into components based on their function.
 
@@ -207,7 +207,7 @@ Destination of the files will be:
 * exit code file -> job_state.exit_code_file
 
 ###4. stop_job method - STAGE 4
-Input params: job (Object of [[galaxy.model.Job](https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy/model/__init__.py#L344))
+Input params: job (Object of [galaxy.model.Job](https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy/model/__init__.py#L344))
 
 Output params: None
 
