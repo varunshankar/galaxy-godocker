@@ -41,19 +41,19 @@ Runner documentation is available [here](https://github.com/varunshankar/galaxy-
 
 Interested in creating a runner? Tutorial is available [here](https://github.com/varunshankar/galaxy-godocker/wiki/%5BTUTORIAL%5D-Create-a-new-runner-for-Galaxy)
 
-# Deliverables:
+# Deliverables
 
-* 1: Title: GoDocker runner for Galaxy
-     Pull Request: https://github.com/galaxyproject/galaxy/pull/2653
-     Status: Merge pending/ In Review.
+* 1: Title: GoDocker runner for Galaxy <br>
+     Pull Request: https://github.com/galaxyproject/galaxy/pull/2653 <br>
+     Status: Merge pending/ In Review. <br>
 
-* 2: Title: A tutorial on Build runner for galaxy
-     Pull Request: https://github.com/galaxyproject/galaxy/pull/2700
-     Status: Merged.
+* 2: Title: A tutorial on Build runner for galaxy <br>
+     Pull Request: https://github.com/galaxyproject/galaxy/pull/2700 <br>
+     Status: Merged. <br>
 
-* 3: Title: A GoDocker tool for Galaxy
-     Link: https://github.com/varunshankar/galaxy-godocker_tool
-     Status: A functional tool is available and needs certain enhancements. 
+* 3: Title: A GoDocker tool for Galaxy <br>
+     Link: https://github.com/varunshankar/galaxy-godocker_tool <br>
+     Status: A functional tool is available and needs certain enhancements. <br>
 
 # Galaxy Quickstart
 
