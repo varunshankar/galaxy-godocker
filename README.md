@@ -23,6 +23,30 @@ The Open Genome Informatics group is organizing the joint efforts of Dockstore, 
 
 **Galaxy**: An open, web-based platform for accessible, reproducible, and transparent computational biomedical research. Link: https://galaxyproject.org/.
 
+#Project structure
+
+    .
+    ├── bin
+    |   ├──  godocker.py        #GoDocker runner code
+    |   ├──  job_conf.xml       #Job configuration for using GoDocker runner.
+    |
+    ├── test                    #Contains test results and scripts.
+    |  
+    ├── tools                   #Contains a Galaxy test tool.
+    └── ...
+
+# Documentation
+
+Runner documentation is available [here](https://github.com/varunshankar/galaxy-godocker/wiki/%5BDOCUMENTATION%5D-GoDocker-runner-for-galaxy)
+
+Interested in creating a runner? Tutorial is available [here](https://github.com/varunshankar/galaxy-godocker/wiki/%5BTUTORIAL%5D-Create-a-new-runner-for-Galaxy)
+
+# Pull Requests
+
+* A tutorial on Build runner for galaxy: https://github.com/galaxyproject/galaxy/pull/2700
+
+* GoDocker runner for Galaxy: https://github.com/galaxyproject/galaxy/pull/2653
+
 # Galaxy Quickstart
 
 * Galaxy requires Python 2.7 To check your python version, run:
@@ -60,18 +84,6 @@ https://wiki.galaxyproject.org/Admin/Tools/AddToolFromToolShedTutorial
 https://wiki.galaxyproject.org/Admin/Tools/ToolDependencies
 
 * The latest information about Galaxy is available via https://galaxyproject.org/
-
-# Documentation
-
-Runner documentation is available [here](https://github.com/varunshankar/galaxy-godocker/wiki/%5BDOCUMENTATION%5D-GoDocker-runner-for-galaxy)
-
-Interested in creating a runner? Tutorial is available [here](https://github.com/varunshankar/galaxy-godocker/wiki/%5BTUTORIAL%5D-Create-a-new-runner-for-Galaxy)
-
-# Pull Requests
-
-* A tutorial on Build runner for galaxy: https://github.com/galaxyproject/galaxy/pull/2700
-
-* GoDocker runner for Galaxy: https://github.com/galaxyproject/galaxy/pull/2653
 
 
 # Architecture
